@@ -1038,20 +1038,18 @@
     </footer>
 
     <script>
-               // --- APPWRITE CONFIGURATION ---
-        const APPWRITE_ENDPOINT = 'https://appwrite.io';
+                      const APPWRITE_ENDPOINT = 'https://appwrite.io';
         const APPWRITE_PROJECT_ID = '6afb393900362353e8e4';
         const DATABASE_ID = 'nutrition_portal_db';
         const TABLE_ID = 'portal_store';
         const ROW_ID = 'main_state';
 
-        const { Client, TablesDB } = Appwrite;
+        const { Client, Databases } = Appwrite;
         const appwriteClient = new Client()
             .setEndpoint(APPWRITE_ENDPOINT)
             .setProject(APPWRITE_PROJECT_ID);
 
-        const tablesDB = new TablesDB(appwriteClient);
-        // ------------------------------
+        const databases = new Databases(appwriteClient);
 
 
         let students = [
@@ -1125,11 +1123,12 @@
 
                 async function loadState(isBackground = false) {
             try {
-                const response = await tablesDB.getRow({
-                    databaseId: DATABASE_ID,
-                    tableId: TABLE_ID,
-                    rowId: ROW_ID
-                });
+                const response = await         const response = await databases.getDocument(
+            DATABASE_ID,
+            TABLE_ID,
+            ROW_ID
+        );
+
 
                 if (!response || !response.data) throw new Error("Empty state");
 
@@ -1212,24 +1211,25 @@
             localStorage.setItem('chuka_cached_state', stringifiedPayload);
 
             try {
-                await tablesDB.updateRow({
-                    databaseId: DATABASE_ID,
-                    tableId: TABLE_ID,
-                    rowId: ROW_ID,
-                    data: { data: stringifiedPayload }
-                });
-                if (document.getElementById('connectionBadge')) {
-                    document.getElementById('connectionBadge').innerHTML = `<i class="fa-solid fa-wifi mr-1.5 text-emerald-400"></i> Online (Appwrite Synced)`;
-                }
-            } catch (err) {
-                if (err.code === 404) {
-                    try {
-                        await tablesDB.createRow({
-                            databaseId: DATABASE_ID,
-                            tableId: TABLE_ID,
-                            rowId: ROW_ID,
-                            data: { data: stringifiedPayload }
-                        });
+                        await databases.updateDocument(
+            DATABASE_ID,
+            TABLE_ID,
+            ROW_ID,
+            { data: stringifiedPayload }
+        );
+        if (document.getElementById('connectionBadge')) {
+            document.getElementById('connectionBadge').innerHTML = `<i class="fa-solid fa-wifi mr-1.5 text-emerald-400"></i> Online (Appwrite Synced)`;
+        }
+    } catch (err) {
+        if (err.code === 404) {
+            try {
+                await databases.createDocument(
+                    DATABASE_ID,
+                    TABLE_ID,
+                    ROW_ID,
+                    { data: stringifiedPayload }
+                );
+
                         if (document.getElementById('connectionBadge')) {
                             document.getElementById('connectionBadge').innerHTML = `<i class="fa-solid fa-wifi mr-1.5 text-emerald-400"></i> Online (Appwrite Synced)`;
                         }
