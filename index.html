@@ -1121,14 +1121,13 @@
             }, 15000);
         };
 
-                async function loadState(isBackground = false) {
+                       async function loadState(isBackground = false) {
             try {
-                const response = await         const response = await databases.getDocument(
-            DATABASE_ID,
-            TABLE_ID,
-            ROW_ID
-        );
-
+                const response = await databases.getDocument(
+                    DATABASE_ID,
+                    TABLE_ID,
+                    ROW_ID
+                );
 
                 if (!response || !response.data) throw new Error("Empty state");
 
