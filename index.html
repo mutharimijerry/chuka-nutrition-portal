@@ -1,0 +1,2291 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chuka Level 5 Hospital - Nutrition Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        portal: {
+                            dark: '#0f292a',
+                            teal: '#115e59',
+                            light: '#f8fafc',
+                            card: '#ffffff',
+                            accent: '#0092f6'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Appwrite Web SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.1"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+        .pre-wrap {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+        }
+        .animate-float {
+            animation: floatSlow 4s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.95; transform: scale(1.005); }
+        }
+        .animate-pulse-glow {
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+            display: flex;
+            width: 200%;
+            animation: marquee 25s linear infinite;
+        }
+        .animate-marquee:hover {
+            animation-play-state: paused;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-teal-500 selection:text-white">
+
+    <!-- Global Connection Banner -->
+    <div id="globalBanner" class="bg-slate-900 text-slate-200 border-b border-slate-800 py-1.5 px-4 text-xs hidden">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <span id="connectionBadge" class="inline-flex items-center font-semibold text-emerald-400">
+                <i class="fa-solid fa-wifi mr-1.5"></i> Portal Online (Offline Sync Enabled)
+            </span>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="flex-grow w-full flex flex-col">
+
+        <!-- VIEW: LOGIN SCREEN -->
+        <section id="loginView" class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 relative bg-gradient-to-br from-[#091f20] to-[#115e59]">
+            <div class="max-w-6xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10">
+                
+                <div class="lg:col-span-6 space-y-6 text-white px-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-emerald-700 shadow-xl border border-white/20">
+                            <i class="fa-solid font-bold text-2xl fa-hospital"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold uppercase tracking-widest text-emerald-300">Chuka Level 5 Hospital</div>
+                            <div class="text-xl sm:text-2xl font-extrabold tracking-tight">Nutrition Portal</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">Excellence in Clinical Nutrition Training</h2>
+                        <p class="text-sm sm:text-base text-emerald-100/90 leading-relaxed">
+                            Secure access to clinical attachments, attendance logs, verified recommendation letters, and real-time supervisor assignments.
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-xs text-emerald-100 space-y-2.5 shadow-xl">
+                        <div class="font-bold text-sm flex items-center gap-2 text-cyan-300"><i class="fa-solid fa-shield-halved"></i> Key Portal Highlights:</div>
+                        <ul class="list-disc pl-5 space-y-1.5 text-slate-200">
+                            <li>Instant sign-in & scheduled attendance window validation</li>
+                            <li>Targeted & bulk Email and WhatsApp direct dispatching with attachments</li>
+                            <li>Direct student interactive reply & feedback inbox with editing/deletion rights</li>
+                            <li>Official Tharaka Nithi County crest verification letters & manual uploads</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-6 flex justify-center w-full">
+                    <div class="w-full max-w-md bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 text-slate-800 space-y-6 border border-white/20">
+                        <div>
+                            <h3 class="text-2xl font-extrabold tracking-tight text-slate-900">Sign in to your portal</h3>
+                            <p class="text-xs text-slate-500 mt-1 font-medium">Enter your REG Number / ID and password</p>
+                        </div>
+
+                        <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Student REG Number / ID</label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-id-card absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                                    <input type="text" id="loginId" required placeholder="e.g. 2023/06028 or ADMIN-001" 
+                                        class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 text-sm font-semibold transition-all">
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between items-center mb-1.5">
+                                    <label class="text-xs font-bold uppercase tracking-wider text-slate-600">Password</label>
+                                    <a href="#" onclick="alert('Contact the hospital administrator.')" class="text-xs font-semibold text-teal-700 hover:underline">Forgot Password?</a>
+                                </div>
+                                <div class="relative">
+                                    <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                                    <input type="password" id="loginPassword" required placeholder="••••••••" 
+                                        class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 text-sm font-semibold transition-all">
+                                </div>
+                            </div>
+
+                            <div id="loginError" class="hidden p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs flex items-center gap-2 font-medium">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                <span id="loginErrorText">Invalid Credentials</span>
+                            </div>
+
+                            <button type="submit" class="w-full py-3.5 bg-[#0092f6] hover:bg-[#007dd4] text-white font-bold rounded-2xl shadow-lg shadow-blue-500/25 transition-all text-sm tracking-wide transform hover:scale-[1.02] active:scale-[0.98]">
+                                LOGIN SECURELY
+                            </button>
+                        </form>
+
+                        <div class="text-center pt-2 border-t border-slate-100 text-xs text-slate-500 font-medium">
+                            New Student Intern? <a href="#" onclick="openModal('addStudentModal')" class="text-teal-700 font-bold hover:underline">[Apply / Register Now]</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- DASHBOARD LAYOUT (WITH SIDEBAR & TOP NAVBAR) -->
+        <div id="dashboardAppView" class="hidden flex-grow flex flex-col lg:flex-row min-h-screen">
+            
+            <!-- SIDEBAR -->
+            <aside class="w-full lg:w-72 bg-[#091f20] text-slate-300 flex flex-col justify-between border-r border-teal-900/40 p-5 space-y-6">
+                <div class="space-y-6">
+                    <!-- Quick Status Card -->
+                    <div class="bg-gradient-to-b from-[#0f292a] to-[#0c2223] border border-teal-800/60 rounded-2xl p-4 text-white shadow-lg space-y-3">
+                        <div class="flex items-center justify-between text-xs font-bold text-emerald-300 uppercase tracking-wider">
+                            <span>Portal Status</span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        </div>
+                        <div class="flex flex-col items-center justify-center py-2 space-y-2">
+                            <div class="w-16 h-16 rounded-2xl bg-teal-900/80 border border-teal-600/40 flex items-center justify-center text-emerald-400 shadow-inner">
+                                <i class="fa-solid fa-user-check text-3xl"></i>
+                            </div>
+                            <div class="text-xs font-bold text-emerald-200">System Ready</div>
+                        </div>
+                        <div class="text-[11px] bg-black/30 rounded-xl p-2.5 text-slate-300 border border-teal-900/50">
+                            <div class="text-slate-400 font-medium">Current User / Status:</div>
+                            <div id="sidebarStatusText" class="font-bold text-white truncate">Active Session</div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Links -->
+                    <nav id="sidebarNavLinks" class="space-y-1.5 text-sm font-semibold">
+                        <!-- Populated dynamically -->
+                    </nav>
+                </div>
+
+                <!-- Sidebar Footer / Logout -->
+                <div class="pt-4 border-t border-teal-900/60 space-y-3">
+                    <div class="flex items-center space-x-3 px-3 py-2 bg-white/5 rounded-xl border border-white/10">
+                        <div class="w-9 h-9 rounded-xl bg-teal-700 text-white font-bold flex items-center justify-center text-sm shadow-md" id="sidebarUserInitials">JM</div>
+                        <div class="overflow-hidden">
+                            <div id="sidebarUserName" class="text-xs font-bold text-white truncate">Jeremiah Mutharimi</div>
+                            <div id="sidebarUserRole" class="text-[10px] text-teal-300 font-mono truncate">Super Admin</div>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="w-full py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout Portal
+                    </button>
+                </div>
+            </aside>
+
+            <!-- MAIN CONTENT WRAPPER -->
+            <div class="flex-grow flex flex-col min-w-0 bg-[#f8fafc]">
+                
+                <!-- TOP HEADER -->
+                <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 px-6 py-4 flex items-center justify-between shadow-sm">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-800 flex items-center justify-center text-white shadow-md">
+                            <i class="fa-solid font-bold text-lg fa-hospital"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                                Chuka Level 5 Hospital Nutrition Portal
+                                <span class="text-[11px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-semibold hidden sm:inline-block">KNDI Accredited</span>
+                            </h1>
+                            <p class="text-[11px] text-slate-500 font-medium">Clinical Attachment & Attendance Management System</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <div class="hidden md:flex items-center space-x-3 text-xs font-semibold text-slate-600 bg-slate-100 px-4 py-2 rounded-2xl border border-slate-200">
+                            <i class="fa-solid fa-calendar-days text-teal-700"></i>
+                            <span id="topBarDate">Oct 21, 2026</span>
+                            <span class="text-slate-300">|</span>
+                            <i class="fa-solid fa-clock text-teal-700"></i>
+                            <span id="topBarClock" class="font-mono font-bold text-slate-800">10:00 AM</span>
+                        </div>
+                        <button onclick="openModal('masterMenuModal')" class="px-3.5 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs shadow-md transition flex items-center gap-2">
+                            <i class="fa-solid fa-bars text-sm"></i>
+                            <span class="hidden sm:inline">Portal Menu</span>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- VIEW: ADMIN SUPERVISOR DASHBOARD -->
+                <section id="adminView" class="hidden flex-grow p-6 sm:p-8 space-y-6 overflow-y-auto">
+                    <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                        <div>
+                            <span class="inline-block px-3.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200 mb-2 shadow-sm">
+                                <i class="fa-solid fa-certificate mr-1"></i> KNDI Authorized Supervisor (Full Administrator)
+                            </span>
+                            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight" id="adminHeaderName">Jeremiah Mutharimi - Admin Supervisor</h2>
+                            <p class="text-sm text-slate-500 font-medium">Chuka Level 5 Hospital Clinical Attachment Management System</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <button onclick="openModal('addStudentModal')" class="px-4 py-2.5 rounded-2xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-sm shadow-md transition-all flex items-center gap-2 transform hover:scale-105 active:scale-95">
+                                <i class="fa-solid fa-user-plus"></i>
+                                <span>Add New Student</span>
+                            </button>
+                            <button onclick="navigateToAdminTab('messagingTab')" class="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition-all flex items-center gap-2 transform hover:scale-105 active:scale-95">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>Bulk WhatsApp & Email</span>
+                            </button>
+                            <button onclick="exportCSV()" class="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-sm transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-file-csv text-teal-700 text-base"></i>
+                                <span>Export CSV</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ADMIN TAB: HOME -->
+                    <div id="adminTab-homeTab" class="admin-tab-content space-y-6">
+                        
+                        <!-- NUTRITION MATERIALS SHOWCASE TICKER -->
+                        <div class="bg-gradient-to-r from-teal-900 via-emerald-950 to-teal-900 text-white rounded-3xl p-6 shadow-xl border border-teal-800/50 overflow-hidden relative">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-cyan-400 animate-ping"></span>
+                                    <h3 class="text-xs font-extrabold uppercase tracking-widest text-cyan-300">Live Clinical Nutrition Materials & Guidelines Ticker (Click any card to read contents)</h3>
+                                </div>
+                                <span class="text-xs text-slate-300 bg-black/30 px-3 py-1 rounded-full font-mono">KNDI Approved Standards</span>
+                            </div>
+                            <div class="overflow-hidden relative w-full py-2">
+                                <div class="animate-marquee flex space-x-6">
+                                    <div onclick="openGuidelineModal('Therapeutic Diets Manual')" class="flex items-center space-x-3 bg-white/10 hover:bg-white/20 transition cursor-pointer px-5 py-3 rounded-2xl border border-white/15 min-w-[320px]">
+                                        <i class="fa-solid fa-book-medical text-cyan-400 text-xl"></i>
+                                        <div><div class="font-bold text-sm">Therapeutic Diets Manual</div><div class="text-xs text-emerald-200">Renal, Diabetic & High-Protein protocols</div></div>
+                                    </div>
+                                    <div onclick="openGuidelineModal('Pediatric RUTF & IMAM Guidelines')" class="flex items-center space-x-3 bg-white/10 hover:bg-white/20 transition cursor-pointer px-5 py-3 rounded-2xl border border-white/15 min-w-[320px]">
+                                        <i class="fa-solid fa-child-reaching text-amber-300 text-xl"></i>
+                                        <div><div class="font-bold text-sm">Pediatric RUTF & IMAM Guidelines</div><div class="text-xs text-emerald-200">Severe Acute Malnutrition management</div></div>
+                                    </div>
+                                    <div onclick="openGuidelineModal('Maternity & MCH Nutrition')" class="flex items-center space-x-3 bg-white/10 hover:bg-white/20 transition cursor-pointer px-5 py-3 rounded-2xl border border-white/15 min-w-[320px]">
+                                        <i class="fa-solid fa-apple-whole text-emerald-300 text-xl"></i>
+                                        <div><div class="font-bold text-sm">Maternity & MCH Nutrition</div><div class="text-xs text-emerald-200">Iron-folate & infant feeding education</div></div>
+                                    </div>
+                                    <div onclick="openGuidelineModal('HIV/AIDS & TB Home Care Diets')" class="flex items-center space-x-3 bg-white/10 hover:bg-white/20 transition cursor-pointer px-5 py-3 rounded-2xl border border-white/15 min-w-[320px]">
+                                        <i class="fa-solid fa-pills text-indigo-300 text-xl"></i>
+                                        <div><div class="font-bold text-sm">HIV/AIDS & TB Home Care Diets</div><div class="text-xs text-emerald-200">Nutritional support for immunocompromised</div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div onclick="navigateToAdminTab('studentsTab')" class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-3 animate-float hover:shadow-xl transition-all cursor-pointer group">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Total Active Students</span>
+                                    <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center group-hover:bg-teal-700 group-hover:text-white transition-all shadow-sm">
+                                        <i class="fa-solid fa-users text-xl"></i>
+                                    </div>
+                                </div>
+                                <div class="text-4xl font-extrabold text-teal-900 tracking-tight" id="statTotalStudents">0</div>
+                                <p class="text-xs text-slate-500 font-medium flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-500"></i> Registered Interns Directory</p>
+                            </div>
+
+                            <div onclick="navigateToAdminTab('loginsTab')" class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-3 animate-pulse-glow hover:shadow-xl transition-all cursor-pointer group">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Today's Sign-Ins</span>
+                                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm">
+                                        <i class="fa-solid fa-clock-rotate-left text-xl"></i>
+                                    </div>
+                                </div>
+                                <div class="text-4xl font-extrabold text-emerald-600 tracking-tight" id="statTodaySignins">0</div>
+                                <p class="text-xs text-slate-500 font-medium flex items-center gap-1.5"><i class="fa-solid fa-wifi text-emerald-500"></i> Daily Archived Records</p>
+                            </div>
+
+                            <div onclick="navigateToAdminTab('inboxTab')" class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-3 animate-float hover:shadow-xl transition-all cursor-pointer group">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Student Replies Inbox</span>
+                                    <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-all shadow-sm">
+                                        <i class="fa-solid fa-inbox text-xl"></i>
+                                    </div>
+                                </div>
+                                <div class="text-4xl font-extrabold text-amber-600 tracking-tight" id="statPendingSubmissions">0</div>
+                                <p class="text-xs text-slate-500 font-medium flex items-center gap-1.5"><i class="fa-solid fa-circle-exclamation text-amber-500"></i> Pending Supervisor Reviews</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ADMIN TAB: MESSAGING & BROADCAST CENTER -->
+                    <div id="adminTab-messagingTab" class="admin-tab-content hidden space-y-6">
+                        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+                            <div class="border-b border-slate-100 pb-4">
+                                <h3 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                                    <i class="fa-solid fa-comments text-indigo-600"></i> Direct & Bulk Messaging Center (Email & WhatsApp Broadcast)
+                                </h3>
+                                <p class="text-xs text-slate-500 font-medium">Send announcements, reminders, and file attachments directly to all students or a specific student.</p>
+                            </div>
+
+                            <form onsubmit="handleSendBroadcastMessage(event)" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Target Recipient(s)</label>
+                                        <select id="msgRecipient" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm font-semibold">
+                                            <option value="ALL">📢 Broadcast to ALL Registered Students</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Message Channel</label>
+                                        <select id="msgChannel" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm font-semibold">
+                                            <option value="whatsapp">📱 Bulk WhatsApp (Direct Web Dispatch)</option>
+                                            <option value="email">📧 Bulk Email Dispatch (Subject & Mailto)</option>
+                                            <option value="portal">🔔 Portal In-App Notification (Enables Direct Student Replies)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Subject / Title</label>
+                                    <input type="text" id="msgSubject" required placeholder="e.g., Urgent: Morning Ward Rotation & Case Study Update" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm font-medium">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Message Content</label>
+                                    <textarea id="msgBody" rows="5" required placeholder="Type your message here..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm font-medium"></textarea>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Attach Resource File (Max 40MB)</label>
+                                    <input type="file" id="msgFile" class="w-full text-xs text-slate-500 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:bg-teal-50 file:text-teal-800 file:font-bold bg-slate-50 border border-slate-200 rounded-2xl">
+                                </div>
+
+                                <div class="flex justify-end pt-2">
+                                    <button type="submit" class="px-6 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-sm shadow-md flex items-center gap-2 transition-all">
+                                        <i class="fa-solid fa-paper-plane"></i> Dispatch Message to Student(s)
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- ADMIN TAB: LOGINS & ATTENDANCE ARCHIVE -->
+                    <div id="adminTab-loginsTab" class="admin-tab-content hidden space-y-6">
+                        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
+                            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                                <div>
+                                    <h3 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                                        <i class="fa-solid fa-calendar-days text-teal-700"></i> Daily Attendance Archive & Logs
+                                    </h3>
+                                    <p class="text-xs text-slate-500 font-medium">Select any date to view archived cumulative logs or manage attendance records.</p>
+                                </div>
+                                <div class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-2xl border border-slate-200">
+                                    <label class="text-xs font-bold text-slate-700 uppercase">Select Date:</label>
+                                    <input type="date" id="attendanceFilterDate" onchange="renderAttendanceLogs()" class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900">
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                                <table class="w-full text-left text-sm border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-700 border-b border-slate-200 text-xs font-bold uppercase tracking-wider">
+                                            <th class="p-3.5">Student Name</th>
+                                            <th class="p-3.5">REG Number</th>
+                                            <th class="p-3.5">Gender</th>
+                                            <th class="p-3.5">Date</th>
+                                            <th class="p-3.5">Sign-In</th>
+                                            <th class="p-3.5">Sign-Out</th>
+                                            <th class="p-3.5 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="attendanceTableBody" class="divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- DAILY ABSENTEE & ACTIVE STATUS REPORT -->
+                        <div class="bg-white border border-amber-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                                <div>
+                                    <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                                        <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Daily Absentee & Incomplete Sign-Out Report
+                                    </h3>
+                                    <p class="text-xs text-slate-500 font-medium">Shows students who failed to log in for the selected date, and active students who haven't signed out yet.</p>
+                                </div>
+                                <span id="absenteeCountBadge" class="px-3.5 py-1.5 bg-amber-100 text-amber-800 rounded-full text-xs font-bold">0 Pending / Absent</span>
+                            </div>
+
+                            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                                <table class="w-full text-left text-sm border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-700 border-b border-slate-200 text-xs font-bold uppercase tracking-wider">
+                                            <th class="p-3.5">Student Name</th>
+                                            <th class="p-3.5">REG Number</th>
+                                            <th class="p-3.5">Email & WhatsApp Phone</th>
+                                            <th class="p-3.5">Status Reason</th>
+                                            <th class="p-3.5 text-right">Quick Message</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="absenteeTableBody" class="divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ADMIN TAB: STUDENTS -->
+                    <div id="adminTab-studentsTab" class="admin-tab-content hidden space-y-6">
+                        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm">
+                            <h3 class="text-lg font-extrabold text-slate-900 mb-4 flex items-center gap-2">
+                                <i class="fa-solid fa-users text-teal-700"></i> Registered Students Directory & Contacts
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="studentsDirectoryGrid"></div>
+                        </div>
+
+                        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm">
+                            <h3 class="text-lg font-extrabold text-slate-900 mb-4 flex items-center gap-2">
+                                <i class="fa-solid fa-user-shield text-amber-600"></i> Administrator Accounts
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="adminsDirectoryGrid"></div>
+                        </div>
+                    </div>
+
+                    <!-- ADMIN TAB: QUESTIONS -->
+                    <div id="adminTab-questionsTab" class="admin-tab-content hidden space-y-6">
+                        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm">
+                            <h3 class="text-lg font-extrabold text-slate-900 mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-paper-plane text-teal-700"></i> Post New Revision Question & Attachment (Up to 40MB)
+                            </h3>
+                            <form id="questionForm" onsubmit="handlePostQuestion(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Question Title / Topic</label>
+                                    <input type="text" id="questTitle" required placeholder="e.g., Advanced Clinical Diet Therapy Case Study" 
+                                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm font-medium">
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Category</label>
+                                        <select id="questCategory" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm font-semibold">
+                                            <option value="Diet Therapy">Diet Therapy</option>
+                                            <option value="Clinical Nutrition">Clinical Nutrition</option>
+                                            <option value="Pediatric Nutrition">Pediatric Nutrition</option>
+                                            <option value="KNDI Licensing Board Prep">KNDI Licensing Board Prep</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Deadline</label>
+                                        <input type="date" id="questDeadline" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm font-medium">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Instructions</label>
+                                    <textarea id="questBody" rows="4" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm font-medium"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Attach File (Max 40MB)</label>
+                                    <input type="file" id="questFile" class="w-full text-xs text-slate-500 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:bg-teal-50 file:text-teal-800 file:font-bold bg-slate-50 border border-slate-200 rounded-2xl">
+                                </div>
+                                <div class="flex justify-end pt-2">
+                                    <button type="submit" class="px-6 py-3 bg-teal-700 hover:bg-teal-800 text-white font-bold rounded-2xl text-sm shadow-md">Publish Question & File</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm">
+                            <h3 class="text-lg font-extrabold text-slate-900 mb-4">Published Revision Questions</h3>
+                            <div id="adminQuestionsList" class="space-y-4"></div>
+                        </div>
+                    </div>
+
+                    <!-- ADMIN TAB: INBOX -->
+                    <div id="adminTab-inboxTab" class="admin-tab-content hidden space-y-4">
+                        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-extrabold text-slate-900">Student Submissions, Message Replies & Assignment Inbox</h3>
+                                <span id="totalSubmissionsCount" class="text-xs px-3.5 py-1.5 bg-teal-100 text-teal-800 rounded-full font-bold">0 Submissions</span>
+                            </div>
+                            <div id="adminSubmissionsList" class="space-y-6"></div>
+                        </div>
+                    </div>
+
+                    <!-- ADMIN TAB: FEATURES -->
+                    <div id="adminTab-featuresTab" class="admin-tab-content hidden space-y-6">
+                        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm">
+                            <h3 class="text-lg font-extrabold text-slate-900 mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-puzzle-piece text-teal-700"></i> Deploy New Custom Feature / Module
+                            </h3>
+                            <p class="text-xs text-slate-500 font-medium mb-4">Add custom modules, clinical resources, or guidelines that will instantly show up in the student portal.</p>
+                            <form onsubmit="handleCreateFeature(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Feature Title</label>
+                                    <input type="text" id="featTitle" required placeholder="e.g., Clinical Diet Therapy Guidelines 2026" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm font-medium">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Feature Description / Instructions</label>
+                                    <textarea id="featDesc" rows="4" required placeholder="Type instructions or details here..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm font-medium"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Attach Resource File (Max 40MB)</label>
+                                    <input type="file" id="featFile" class="w-full text-xs text-slate-500 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:bg-teal-50 file:text-teal-800 file:font-bold bg-slate-50 border border-slate-200 rounded-2xl">
+                                </div>
+                                <div class="flex justify-end pt-2">
+                                    <button type="submit" class="px-6 py-3 bg-teal-700 hover:bg-teal-800 text-white font-bold rounded-2xl text-sm shadow-md">Publish Feature to Students</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm">
+                            <h3 class="text-lg font-extrabold text-slate-900 mb-4">Active Custom Features</h3>
+                            <div id="adminFeaturesList" class="space-y-4"></div>
+                        </div>
+                    </div>
+
+                    <!-- ADMIN TAB: RECOMMENDATIONS -->
+                    <div id="adminTab-recommendationsTab" class="admin-tab-content hidden space-y-6">
+                        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+                            <div class="border-b border-slate-100 pb-4">
+                                <h3 class="text-lg font-extrabold text-slate-900">Upload & Manage Custom Recommendation Letters</h3>
+                                <p class="text-xs text-slate-500 font-medium">Manually upload signed recommendation documents (PDF/Word/Scans) for students or generate official county crest letters.</p>
+                            </div>
+
+                            <form onsubmit="handleManualLetterUpload(event)" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Select Student</label>
+                                        <select id="uploadLetterStudentId" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm font-semibold" required></select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Recommendation Document (PDF/DOCX/Scan)</label>
+                                        <input type="file" id="manualLetterFile" required class="w-full text-xs text-slate-500 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:bg-teal-50 file:text-teal-800 file:font-bold bg-slate-50 border border-slate-200 rounded-2xl">
+                                    </div>
+                                </div>
+                                <div class="flex justify-end">
+                                    <button type="submit" class="px-6 py-3 bg-teal-700 hover:bg-teal-800 text-white font-bold rounded-2xl text-sm shadow-md flex items-center gap-2">
+                                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload & Save Recommendation Letter
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
+                            <h3 class="text-lg font-extrabold text-slate-900">Generate KNDI Attachment Completion Letters</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Select Student for Crest Letter</label>
+                                    <select id="recommendStudentSelect" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm font-semibold"></select>
+                                </div>
+                            </div>
+                            <button onclick="generateRecommendationLetter()" class="px-6 py-3 bg-teal-700 hover:bg-teal-800 text-white font-bold rounded-2xl text-sm shadow-md">Preview & Print Official Letter</button>
+                        </div>
+
+                        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
+                            <h3 class="text-lg font-extrabold text-slate-900">Manually Uploaded Letters Archive</h3>
+                            <div id="uploadedLettersList" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: STUDENT PORTAL DASHBOARD -->
+                <section id="studentView" class="hidden flex-grow p-6 sm:p-8 space-y-6 overflow-y-auto">
+                    <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-2.5 mb-1.5">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold bg-teal-100 text-teal-800">Clinical Student Intern</span>
+                                <span id="studentRegBadge" class="text-xs font-mono font-bold text-slate-500">2023/06028</span>
+                            </div>
+                            <h2 id="studentHeaderName" class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Student Name</h2>
+                            <p id="studentHeaderDept" class="text-sm text-slate-500 font-medium">Department of Nutrition & Dietetics | Chuka Level 5 Hospital</p>
+                        </div>
+
+                        <div class="bg-slate-900 text-slate-100 p-4 sm:p-5 rounded-2xl text-right flex flex-col items-end min-w-[240px] shadow-lg border border-slate-800">
+                            <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">Live Hospital Clock</div>
+                            <div id="liveClock" class="text-2xl font-extrabold font-mono text-cyan-400">--:--:--</div>
+                            <div id="liveDate" class="text-xs text-slate-400 font-medium mt-0.5">----</div>
+                        </div>
+                    </div>
+
+                    <!-- STUDENT TAB: HOME -->
+                    <div id="studentTab-studentHomeTab" class="student-tab-content space-y-6">
+                        
+                        <!-- NUTRITION MATERIALS SHOWCASE TICKER -->
+                        <div class="bg-gradient-to-r from-teal-900 via-emerald-950 to-teal-900 text-white rounded-3xl p-6 shadow-xl border border-teal-800/50 overflow-hidden relative">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-cyan-400 animate-ping"></span>
+                                    <h3 class="text-xs font-extrabold uppercase tracking-widest text-cyan-300">Clinical Attachment Learning Resources & Guidelines</h3>
+                                </div>
+                                <span class="text-xs text-slate-300 bg-black/30 px-3 py-1 rounded-full font-mono">Chuka Level 5 Hospital</span>
+                            </div>
+                            <div class="overflow-hidden relative w-full py-2">
+                                <div class="animate-marquee flex space-x-6">
+                                    <div class="flex items-center space-x-3 bg-white/10 px-5 py-3 rounded-2xl border border-white/15 min-w-[320px]">
+                                        <i class="fa-solid fa-notes-medical text-cyan-400 text-xl"></i>
+                                        <div><div class="font-bold text-sm">Clinical Nutrition Ward Protocols</div><div class="text-xs text-emerald-200">Maternity, Renal & Pediatric guidelines</div></div>
+                                    </div>
+                                    <div class="flex items-center space-x-3 bg-white/10 px-5 py-3 rounded-2xl border border-white/15 min-w-[320px]">
+                                        <i class="fa-solid fa-award text-amber-300 text-xl"></i>
+                                        <div><div class="font-bold text-sm">Recommendation Letter Portal</div><div class="text-xs text-emerald-200">Download verified county letters</div></div>
+                                    </div>
+                                    <div class="flex items-center space-x-3 bg-white/10 px-5 py-3 rounded-2xl border border-white/15 min-w-[320px]">
+                                        <i class="fa-solid fa-utensils text-emerald-300 text-xl"></i>
+                                        <div><div class="font-bold text-sm">Hospital Kitchen & RUTF Prep</div><div class="text-xs text-emerald-200">Therapeutic milk & sanitation standards</div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div onclick="navigateToStudentTab('studentClockTab')" class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-3 animate-float cursor-pointer hover:shadow-xl transition-all group">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Today's Attendance</span>
+                                    <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center group-hover:bg-teal-700 group-hover:text-white transition-all shadow-sm">
+                                        <i class="fa-solid fa-user-clock text-xl"></i>
+                                    </div>
+                                </div>
+                                <div class="text-2xl font-extrabold text-teal-900 tracking-tight" id="homeStudentStatus">Checking...</div>
+                                <p class="text-xs text-slate-500 font-medium">Click to Clock In or Out</p>
+                            </div>
+                            <div onclick="navigateToStudentTab('studentInboxTab')" class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-3 animate-pulse-glow cursor-pointer hover:shadow-xl transition-all group">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Broadcasts & Questions</span>
+                                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
+                                        <i class="fa-solid fa-inbox text-xl"></i>
+                                    </div>
+                                </div>
+                                <div class="text-4xl font-extrabold text-indigo-600 tracking-tight" id="homeAssignedCount">0</div>
+                                <p class="text-xs text-slate-500 font-medium">Read messages & reply here</p>
+                            </div>
+                            <div onclick="navigateToStudentTab('studentFeaturesTab')" class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-3 animate-float cursor-pointer hover:shadow-xl transition-all group">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Custom Modules</span>
+                                    <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-all shadow-sm">
+                                        <i class="fa-solid fa-puzzle-piece text-xl"></i>
+                                    </div>
+                                </div>
+                                <div class="text-4xl font-extrabold text-amber-600 tracking-tight" id="homeModulesCount">0</div>
+                                <p class="text-xs text-slate-500 font-medium">Explore published modules</p>
+                            </div>
+                        </div>
+
+                        <!-- STUDENT RECOMMENDATION LETTER DOWNLOAD SECTION -->
+                        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
+                            <h3 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                                <i class="fa-solid fa-award text-amber-600"></i> My Official Recommendation Letters & Documents
+                            </h3>
+                            <p class="text-xs text-slate-500 font-medium">Download your uploaded or generated KNDI attachment completion letters.</p>
+                            <div id="studentMyLettersList" class="space-y-3"></div>
+                        </div>
+                    </div>
+
+                    <!-- STUDENT TAB: CLOCK IN / OUT -->
+                    <div id="studentTab-studentClockTab" class="student-tab-content hidden space-y-6">
+                        <div class="bg-gradient-to-r from-teal-900 to-slate-900 text-white border border-teal-700/50 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+                            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-teal-700/60 pb-4">
+                                <div>
+                                    <h3 class="text-lg font-extrabold flex items-center gap-2">
+                                        <i class="fa-solid fa-clock text-cyan-400"></i> Daily Attendance Clock In / Out (Fast & Reliable)
+                                    </h3>
+                                    <p class="text-xs text-teal-200 font-medium mt-1" id="studentClockWindowDisplay">
+                                        Morning Sign-In window: 06:00 AM - 09:00 AM | Evening Sign-Out window: 04:00 PM - 05:00 PM
+                                    </p>
+                                </div>
+                                <div id="todayStatusBadge" class="px-4 py-2 rounded-2xl text-xs font-bold bg-slate-800 text-cyan-300 border border-slate-700 shadow-md">Status: Checking...</div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                                <div class="p-5 rounded-2xl bg-slate-900/60 border border-slate-700 space-y-3 shadow-inner">
+                                    <div class="flex justify-between text-xs font-bold text-slate-300 uppercase"><span>Morning Sign-In</span><span id="dispSignInRange" class="font-mono text-cyan-400">06:00 - 09:00 AM</span></div>
+                                    <button id="btnSignIn" onclick="executeStudentSignIn()" class="w-full py-3.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 text-white font-bold rounded-2xl shadow-lg transition-all text-sm flex items-center justify-center gap-2 transform hover:scale-[1.02]">
+                                        <i class="fa-solid fa-right-to-bracket text-base"></i><span>Instant Sign In</span>
+                                    </button>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/60 border border-slate-700 space-y-3 shadow-inner">
+                                    <div class="flex justify-between text-xs font-bold text-slate-300 uppercase"><span>Evening Sign-Out</span><span id="dispSignOutRange" class="font-mono text-cyan-400">04:00 - 05:00 PM</span></div>
+                                    <button id="btnSignOut" onclick="executeStudentSignOut()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-bold rounded-2xl shadow-lg transition-all text-sm flex items-center justify-center gap-2 transform hover:scale-[1.02]">
+                                        <i class="fa-solid fa-right-from-bracket text-base"></i><span>Instant Sign Out</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STUDENT TAB: ATTENDANCE HISTORY -->
+                    <div id="studentTab-studentLogTab" class="student-tab-content hidden space-y-4">
+                        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm">
+                            <h3 class="text-lg font-extrabold text-slate-900 mb-4">My Personal Attendance Log</h3>
+                            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                                <table class="w-full text-left text-sm border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-700 border-b border-slate-200 text-xs font-bold uppercase tracking-wider">
+                                            <th class="p-3.5">Date</th>
+                                            <th class="p-3.5">Sign-In Time</th>
+                                            <th class="p-3.5">Sign-Out Time</th>
+                                            <th class="p-3.5">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="studentAttendanceTableBody" class="divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STUDENT TAB: INBOX -->
+                    <div id="studentTab-studentInboxTab" class="student-tab-content hidden space-y-4">
+                        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm">
+                            <h3 class="text-lg font-extrabold text-slate-900 mb-1">Broadcast Messages & Supervisor Questions</h3>
+                            <p class="text-xs text-slate-500 font-medium mb-4">Read announcements from the hospital supervisor, reply directly, or upload/modify required files here.</p>
+                            <div id="studentQuestionsList" class="space-y-6 pt-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- STUDENT TAB: FEATURES -->
+                    <div id="studentTab-studentFeaturesTab" class="student-tab-content hidden space-y-4">
+                        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm">
+                            <h3 class="text-lg font-extrabold text-slate-900 mb-4">Custom Features & Modules Published by Admin</h3>
+                            <div id="studentFeaturesList" class="space-y-4"></div>
+                        </div>
+                    </div>
+
+                    <!-- STUDENT TAB: PROFILE -->
+                    <div id="studentTab-studentProfileTab" class="student-tab-content hidden space-y-4">
+                        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm max-w-xl">
+                            <h3 class="text-lg font-extrabold text-slate-900 mb-1">Manage Profile, Email & WhatsApp Number</h3>
+                            <p class="text-xs text-slate-500 font-medium mb-4">Update your email and WhatsApp phone number to receive assignment feedback notifications.</p>
+                            <form onsubmit="handleUpdateStudentProfile(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs uppercase font-bold text-slate-600 mb-1.5">Full Name</label>
+                                    <input type="text" id="editStudentProfileName" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium">
+                                </div>
+                                <div>
+                                    <label class="block text-xs uppercase font-bold text-slate-600 mb-1.5">Email Address (For Notifications)</label>
+                                    <input type="email" id="editStudentProfileEmail" placeholder="student@gmail.com" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium">
+                                </div>
+                                <div>
+                                    <label class="block text-xs uppercase font-bold text-slate-600 mb-1.5">WhatsApp Phone Number</label>
+                                    <input type="text" id="editStudentProfilePhone" placeholder="+254700000000" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium">
+                                </div>
+                                <div>
+                                    <label class="block text-xs uppercase font-bold text-slate-600 mb-1.5">Gender</label>
+                                    <select id="editStudentProfileGender" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold">
+                                        <option value="Male">Male (He / Him / His)</option>
+                                        <option value="Female">Female (She / Her / Hers)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs uppercase font-bold text-slate-600 mb-1.5">Department</label>
+                                    <input type="text" id="editStudentProfileDept" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium">
+                                </div>
+                                <div>
+                                    <label class="block text-xs uppercase font-bold text-slate-600 mb-1.5">New Password</label>
+                                    <input type="password" id="editStudentProfilePass" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium">
+                                </div>
+                                <div class="flex justify-end pt-2">
+                                    <button type="submit" class="px-6 py-3 bg-teal-700 hover:bg-teal-800 text-white font-bold rounded-2xl text-sm shadow-md">Save Profile & Contacts</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- MASTER MENU MODAL (INCLUDES ATTENDANCE RULES) -->
+    <div id="masterMenuModal" class="fixed inset-0 bg-black/70 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white text-slate-900 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative space-y-6 border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal('masterMenuModal')" class="absolute right-5 top-5 text-slate-400 hover:text-slate-700 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <div class="flex items-center gap-3.5 border-b border-slate-100 pb-4">
+                <div class="w-12 h-12 rounded-2xl bg-teal-700 text-white flex items-center justify-center text-xl shadow-md"><i class="fa-solid fa-compass"></i></div>
+                <div>
+                    <h3 class="text-lg font-extrabold text-slate-900">Portal Master Menu & Settings</h3>
+                    <p class="text-xs text-slate-500 font-medium">Navigate features or configure hospital attendance rules</p>
+                </div>
+            </div>
+
+            <!-- ADMIN ATTENDANCE WINDOW RULES (CONFIGURABLE HERE) -->
+            <div id="adminRulesSectionModal" class="hidden bg-teal-50 border border-teal-200 rounded-2xl p-5 space-y-4">
+                <div class="flex items-center justify-between border-b border-teal-200 pb-3">
+                    <h4 class="text-sm font-extrabold text-teal-900 flex items-center gap-2">
+                        <i class="fa-solid fa-clock text-teal-700"></i> Attendance Window Rules Configuration
+                    </h4>
+                    <div class="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-xl border border-teal-200">
+                        <input type="checkbox" id="toggleStrictTime" onchange="toggleSetting('enforceTime')" class="rounded bg-white border-slate-300 text-teal-600 w-4 h-4 cursor-pointer">
+                        <label for="toggleStrictTime" class="text-xs font-bold text-teal-900 cursor-pointer">Enforce Strict Time</label>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-medium">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Morning Sign-In Start / End</label>
+                        <div class="flex gap-2">
+                            <input type="time" id="cfgSignInStart" value="06:00" class="w-1/2 px-3 py-2 bg-white border border-slate-200 rounded-xl font-mono font-semibold">
+                            <input type="time" id="cfgSignInEnd" value="09:00" class="w-1/2 px-3 py-2 bg-white border border-slate-200 rounded-xl font-mono font-semibold">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Evening Sign-Out Start / End</label>
+                        <div class="flex gap-2">
+                            <input type="time" id="cfgSignOutStart" value="16:00" class="w-1/2 px-3 py-2 bg-white border border-slate-200 rounded-xl font-mono font-semibold">
+                            <input type="time" id="cfgSignOutEnd" value="17:00" class="w-1/2 px-3 py-2 bg-white border border-slate-200 rounded-xl font-mono font-semibold">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button onclick="saveAdminTimeSettings()" class="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl text-xs font-bold shadow-md">Save Attendance Rules</button>
+                </div>
+            </div>
+
+            <div id="masterMenuList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 py-2"></div>
+
+            <div class="pt-4 border-t border-slate-100 flex justify-end">
+                <button onclick="closeModal('masterMenuModal')" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">Close Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: GUIDELINE READER -->
+    <div id="guidelineModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white text-slate-900 rounded-3xl max-w-2xl w-full p-8 shadow-2xl relative my-8 space-y-5 border border-slate-100">
+            <button onclick="closeModal('guidelineModal')" class="absolute right-6 top-6 text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <div class="flex items-center gap-3.5 border-b border-slate-100 pb-4">
+                <div class="w-12 h-12 rounded-2xl bg-teal-700 text-white flex items-center justify-center text-xl shadow-md"><i class="fa-solid fa-book-medical"></i></div>
+                <div>
+                    <h3 id="guidelineTitle" class="text-lg font-extrabold text-slate-900">Clinical Guideline</h3>
+                    <p class="text-xs text-teal-700 font-bold uppercase">Chuka Level 5 Hospital • KNDI Standard Protocol</p>
+                </div>
+            </div>
+            <div id="guidelineContent" class="text-sm text-slate-700 space-y-3 font-medium leading-relaxed max-h-[60vh] overflow-y-auto pr-2"></div>
+            <div class="pt-4 border-t border-slate-100 flex justify-end">
+                <button onclick="closeModal('guidelineModal')" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">Close Reader</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD STUDENT -->
+    <div id="addStudentModal" class="fixed inset-0 bg-black/70 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white text-slate-900 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative border border-slate-100">
+            <button onclick="closeModal('addStudentModal')" class="absolute right-5 top-5 text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-xl font-extrabold text-slate-900 mb-4">Register New Student & Contacts</h3>
+            <form onsubmit="handleAddStudent(event)" class="space-y-4">
+                <div><label class="block text-xs uppercase font-bold text-slate-600 mb-1">Full Name</label><input type="text" id="newStudentName" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium" placeholder="Wilberforce Joses Mwenda"></div>
+                <div><label class="block text-xs uppercase font-bold text-slate-600 mb-1">Registration REG Number</label><input type="text" id="newStudentReg" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium" placeholder="2023/06028"></div>
+                <div><label class="block text-xs uppercase font-bold text-slate-600 mb-1">Email Address</label><input type="email" id="newStudentEmail" placeholder="student@gmail.com" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium"></div>
+                <div><label class="block text-xs uppercase font-bold text-slate-600 mb-1">WhatsApp Phone Number</label><input type="text" id="newStudentPhone" placeholder="+254700000000" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium"></div>
+                <div>
+                    <label class="block text-xs uppercase font-bold text-slate-600 mb-1">Gender</label>
+                    <select id="newStudentGender" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold">
+                        <option value="Male">Male (He / Him / His)</option>
+                        <option value="Female">Female (She / Her / Hers)</option>
+                    </select>
+                </div>
+                <div><label class="block text-xs uppercase font-bold text-slate-600 mb-1">Default Password</label><input type="text" id="newStudentPass" value="chuka@2026" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium"></div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" onclick="closeModal('addStudentModal')" class="px-4 py-2.5 rounded-2xl bg-slate-100 text-slate-700 text-sm font-bold">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-2xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-sm shadow-md">Save Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EDIT STUDENT -->
+    <div id="editStudentModal" class="fixed inset-0 bg-black/70 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white text-slate-900 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative border border-slate-100">
+            <button onclick="closeModal('editStudentModal')" class="absolute right-5 top-5 text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-xl font-extrabold text-slate-900 mb-4">Edit Student Details & Contacts</h3>
+            <form onsubmit="handleEditStudent(event)" class="space-y-4">
+                <input type="hidden" id="editStudentIndex">
+                <div><label class="block text-xs uppercase font-bold text-slate-600 mb-1">Full Name</label><input type="text" id="editStudentName" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium"></div>
+                <div><label class="block text-xs uppercase font-bold text-slate-600 mb-1">Registration REG Number</label><input type="text" id="editStudentReg" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium"></div>
+                <div><label class="block text-xs uppercase font-bold text-slate-600 mb-1">Email Address</label><input type="email" id="editStudentEmail" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium"></div>
+                <div><label class="block text-xs uppercase font-bold text-slate-600 mb-1">WhatsApp Phone Number</label><input type="text" id="editStudentPhone" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium"></div>
+                <div>
+                    <label class="block text-xs uppercase font-bold text-slate-600 mb-1">Gender</label>
+                    <select id="editStudentGender" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold">
+                        <option value="Male">Male (He / Him / His)</option>
+                        <option value="Female">Female (She / Her / Hers)</option>
+                    </select>
+                </div>
+                <div><label class="block text-xs uppercase font-bold text-slate-600 mb-1">Password</label><input type="text" id="editStudentPass" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium"></div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" onclick="closeModal('editStudentModal')" class="px-4 py-2.5 rounded-2xl bg-slate-100 text-slate-700 text-sm font-bold">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-2xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-sm shadow-md">Update Details</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: LETTER -->
+    <div id="letterModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white text-slate-900 rounded-3xl max-w-3xl w-full p-8 sm:p-12 shadow-2xl relative my-8 font-serif border border-slate-100">
+            <button onclick="closeModal('letterModal')" class="absolute right-6 top-6 text-slate-500 hover:text-black font-sans"><i class="fa-solid fa-xmark text-xl"></i></button>
+            
+            <div id="printableLetter" class="space-y-6 text-sm">
+                <div class="text-center space-y-1.5">
+                    <div class="flex justify-center mb-2">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/Tharaka_Nithi_County_Coat_of_Arms.png" 
+                             id="countyCrestImg"
+                             alt="Tharaka Nithi County Coat of Arms" 
+                             class="h-24 object-contain mx-auto">
+                    </div>
+                    <h2 class="text-base font-bold text-[#1a365d] uppercase tracking-wide">THARAKA NITHI COUNTY GOVERNMENT</h2>
+                    <h3 class="text-sm font-bold text-[#1a365d] uppercase tracking-wide">DEPARTMENT OF HEALTH SERVICES AND SANITATION</h3>
+                    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wide">CHUKA LEVEL 5 HOSPITAL</h4>
+                    <h5 class="text-xs font-bold text-slate-800 uppercase tracking-wide">OFFICE OF THE MEDICAL SUPERINTENDENT</h5>
+                    <p class="text-xs text-slate-800 font-medium">P.O. BOX 8 – 60400</p>
+                    <p class="text-xs text-slate-800 font-medium">
+                        CHUKA <span class="font-bold">CELL:</span> 0728 226 333 &nbsp;&nbsp;&nbsp; 
+                        <span class="font-bold underline">EMAIL:</span> <a href="mailto:medsuptchuka@gmail.com" class="text-blue-700 underline">medsuptchuka@gmail.com</a>
+                    </p>
+                </div>
+
+                <div class="pt-2 text-xs font-bold text-slate-900 space-y-1">
+                    <div>When replying please quote:</div>
+                    <div class="flex justify-between items-center">
+                        <div>REF: CKA/MED/T/26/VOL.VI/<span id="letterRefNo">429</span></div>
+                        <div>DATE: <span id="letterDate">09/01/2026</span></div>
+                    </div>
+                </div>
+
+                <div class="border-t-2 border-b border-slate-900 h-1 my-3"></div>
+
+                <div class="text-xs font-bold uppercase tracking-wide pt-1">TO WHOM IT MAY CONCERN</div>
+
+                <div class="font-bold text-sm uppercase text-slate-900">
+                    RECOMMENDATION FOR <span id="letterStudentName">---</span><br>
+                    <span class="text-xs font-mono font-bold">REG: <span id="letterStudentReg">---</span></span>
+                </div>
+
+                <div class="leading-relaxed space-y-3 font-sans text-xs sm:text-sm">
+                    <p>
+                        I am pleased to recommend the above-named student who successfully completed a three-month clinical attachment in our institution. During this period, <span id="pronounHeShe">he</span> consistently demonstrated competence, dedication, and professionalism in all assigned responsibilities.
+                    </p>
+                    <p class="font-bold text-slate-800"><span id="pronounHisHer">His</span> contributions and core clinical duties included:</p>
+                    <ul class="list-disc pl-5 space-y-1.5 text-slate-700 font-medium">
+                        <li>Delivering nutrition health education on maternal, infant, and young child practices in the maternity ward.</li>
+                        <li>Conducting growth monitoring, vitamin A supplementation, deworming, and promoting maternal and child nutrition at the MCH unit.</li>
+                        <li>Performing nutrition assessments and developing individualized care plans for patients in surgical, medical, and renal wards.</li>
+                        <li>Providing nutrition education, critical care support, and therapeutic diets for home-care among individuals living with HIV/AIDS and TB.</li>
+                        <li>Monitoring discharged patients to ensure preventive, curative, and rehabilitative nutrition support while compiling reports at the office.</li>
+                        <li>Preparing therapeutic milk for pediatric patients and overseeing food safety, sanitation, and quality standards in the hospital kitchen.</li>
+                    </ul>
+                    <p>
+                        Throughout the attachment, <span id="pronounHeShe2">he</span> exhibited strong teamwork, integrity, and a remarkable work ethic with a genuine commitment to improving patient outcomes.
+                    </p>
+                    <p>
+                        We confidently recommend <span id="pronounHimHer2">him</span> for future career and licensing opportunities with the Kenya Nutritionists and Dieticians Institute (KNDI).
+                    </p>
+                </div>
+
+                <div class="pt-8 border-t border-slate-300 flex justify-between items-end font-sans text-xs">
+                    <div>
+                        <div class="font-extrabold text-slate-900 uppercase">JEREMIAH MUTHARIMI</div>
+                        <div class="text-slate-700 font-bold">CLINICAL ATTACHMENT SUPERVISOR</div>
+                        <div class="text-emerald-800 font-extrabold">CHUKA LEVEL 5 HOSPITAL</div>
+                    </div>
+                    <div class="text-center pr-8">
+                        <div class="w-32 h-14 border border-dashed border-slate-400 flex items-center justify-center text-[10px] text-slate-500 italic rounded-xl">
+                            [ Official Stamp / Signature ]
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-4 border-t border-slate-200 flex justify-end space-x-3 font-sans">
+                <button onclick="closeModal('letterModal')" class="px-5 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold">Close</button>
+                <button onclick="window.print()" class="px-6 py-2.5 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-bold shadow-md flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i> Print Official Letter
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 py-4 text-center text-xs font-medium">
+        <p>© 2026 Tharaka Nithi County Government • Chuka Level 5 Hospital • Department of Health Services & Sanitation</p>
+    </footer>
+
+    <script>
+               // --- APPWRITE CONFIGURATION ---
+        const APPWRITE_ENDPOINT = 'https://appwrite.io';
+        const APPWRITE_PROJECT_ID = '6afb393900362353e8e4';
+        const DATABASE_ID = 'nutrition_portal_db';
+        const TABLE_ID = 'portal_store';
+        const ROW_ID = 'main_state';
+
+        const { Client, TablesDB } = Appwrite;
+        const appwriteClient = new Client()
+            .setEndpoint(APPWRITE_ENDPOINT)
+            .setProject(APPWRITE_PROJECT_ID);
+
+        const tablesDB = new TablesDB(appwriteClient);
+        // ------------------------------
+
+
+        let students = [
+            { id: '2023/06028', name: 'Wilberforce Joses Mwenda', gender: 'Male', password: 'chuka@2026', dept: 'Department of Nutrition & Dietetics', email: 'wilberforce@gmail.com', phone: '+254712345678' },
+            { id: 'STU-001', name: 'Marcella Chemuto', gender: 'Female', password: 'chuka@2026', dept: 'Department of Nutrition & Dietetics', email: 'marcella@gmail.com', phone: '+254722334455' },
+            { id: 'STU-002', name: 'Beavaline Aluoch', gender: 'Female', password: 'chuka@2026', dept: 'Department of Nutrition & Dietetics', email: 'beavaline@gmail.com', phone: '+254733445566' }
+        ];
+
+        let admins = [
+            { id: 'ADMIN-001', name: 'Jeremiah Mutharimi', password: 'admin123', rights: 'Super Admin' },
+            { id: 'ADMIN-002', name: 'Purity Murugi', password: 'purity123', rights: 'Nutrition In Charge' }
+        ];
+
+        let attendance = [];
+        let questions = [];
+        let studentAnswers = {};
+        let customFeatures = [];
+        let uploadedLetters = [];
+        let settings = { 
+            enforceTime: false,
+            signInStart: "06:00",
+            signInEnd: "09:00",
+            signOutStart: "16:00",
+            signOutEnd: "17:00"
+        };
+        let currentUser = null;
+        let refCounter = 429;
+
+        const guidelineLibrary = {
+            "Therapeutic Diets Manual": `
+                <h4 class="font-extrabold text-teal-900 text-base mb-2">Chuka Level 5 Hospital Clinical Protocol: Therapeutic Diets Manual</h4>
+                <p><strong>1. Renal Diets:</strong> Strict sodium (2-3g/day), potassium (<2000mg/day for stage 4-5 CKD), and phosphate restriction. Ensure controlled protein intake (0.6-0.8g/kg body weight for non-dialysis CKD) with at least 50% high biologic value (HBV) proteins.</p>
+                <p class="mt-2"><strong>2. Diabetic Medical Nutrition Therapy (MNT):</strong> Low glycemic index (GI) carbohydrates, high dietary fiber (>30g/day from whole grains and vegetables), and monounsaturated fats. Consistent carbohydrate distribution across 3 main meals and 2 healthy snacks.</p>
+                <p class="mt-2"><strong>3. High-Protein High-Calorie (HPHC):</strong> Indicated for surgical, burn, and oncology patients. Target 1.2 - 1.5g protein/kg/day and 30-35 kcal/kg/day to prevent protein-energy malnutrition (PEM) and support tissue healing.</p>
+            `,
+            "Pediatric RUTF & IMAM Guidelines": `
+                <h4 class="font-extrabold text-teal-900 text-base mb-2">Integrated Management of Acute Malnutrition (IMAM) & RUTF Protocol</h4>
+                <p><strong>1. Severe Acute Malnutrition (SAM) with Complications:</strong> Admit to stabilization ward. Initiate F-75 therapeutic milk (low sodium, low protein, high carbohydrate) every 2-3 hours. Prevent hypothermia, hypoglycemia, and dehydration carefully.</p>
+                <p class="mt-2"><strong>2. SAM without Complications (Outpatient Therapeutic Program - OTP):</strong> Provide Ready-to-Use Therapeutic Food (RUTF - Plumpy'Nut) based on weight brackets. Routine medical treatment including amoxicillin, measles vaccination, and deworming.</p>
+                <p class="mt-2"><strong>3. Moderate Acute Malnutrition (MAM):</strong> Managed through Supplementary Feeding Programs (SFP) using Super Cereal / Corn Soya Blend (CSB+).</p>
+            `,
+            "Maternity & MCH Nutrition": `
+                <h4 class="font-extrabold text-teal-900 text-base mb-2">Maternal, Infant, and Young Child Nutrition (MIYCN) Guidelines</h4>
+                <p><strong>1. Antenatal Care (ANC) Supplementation:</strong> Routine daily iron and folic acid supplementation (IFAS) throughout pregnancy to prevent maternal anemia and neural tube defects. Calcium supplementation in high-risk populations.</p>
+                <p class="mt-2"><strong>2. Exclusive Breastfeeding (EBF):</strong> Initiate breastfeeding within the first hour of birth. Exclusive breastfeeding for the first 6 months of life without water or other liquids.</p>
+                <p class="mt-2"><strong>3. Complementary Feeding:</strong> Introduce nutritionally adequate and safe complementary foods at 6 months while continuing breastfeeding up to 2 years and beyond.</p>
+            `,
+            "HIV/AIDS & TB Home Care Diets": `
+                <h4 class="font-extrabold text-teal-900 text-base mb-2">Nutritional Care and Support for HIV/AIDS and TB Patients</h4>
+                <p><strong>1. Energy Requirements:</strong> Increase total daily energy intake by 10% for asymptomatic HIV adults, and by 20-30% for symptomatic adults and children to combat resting energy expenditure (REE).</p>
+                <p class="mt-2"><strong>2. Micronutrient Supplementation:</strong> Therapeutic doses of multi-vitamins and minerals to boost immune function. Ensure adequate clean and safe drinking water to prevent opportunistic gastrointestinal infections.</p>
+                <p class="mt-2"><strong>3. Managing Drug-Food Interactions:</strong> Counsel patients on taking specific TB medications (e.g., isoniazid, rifampicin) and ARVs with appropriate food timing to minimize nausea and maximize bioavailability.</p>
+            `
+        };
+
+        window.onload = async function() {
+            await loadState();
+            startLiveClock();
+            checkSession();
+            
+            const todayStr = new Date().toLocaleDateString('en-CA');
+            const dateInput = document.getElementById('attendanceFilterDate');
+            if (dateInput) dateInput.value = todayStr;
+
+            setInterval(async () => {
+                if (currentUser && currentUser.role === 'admin') {
+                    await loadState(true);
+                }
+            }, 15000);
+        };
+
+                async function loadState(isBackground = false) {
+            try {
+                const response = await tablesDB.getRow({
+                    databaseId: DATABASE_ID,
+                    tableId: TABLE_ID,
+                    rowId: ROW_ID
+                });
+
+                if (!response || !response.data) throw new Error("Empty state");
+
+                const state = typeof response.data === 'string' 
+                    ? JSON.parse(response.data) 
+                    : response.data;
+
+                if (state.students) students = state.students;
+                if (state.admins) admins = state.admins;
+                if (state.questions) questions = state.questions;
+                
+                if (state.attendance && Array.isArray(state.attendance)) {
+                    state.attendance.forEach(remoteLog => {
+                        const exists = attendance.find(local => local.studentId === remoteLog.studentId && local.date === remoteLog.date);
+                        if (!exists) {
+                            attendance.push(remoteLog);
+                        } else {
+                            if (remoteLog.signInTime) exists.signInTime = remoteLog.signInTime;
+                            if (remoteLog.signOutTime) exists.signOutTime = remoteLog.signOutTime;
+                        }
+                    });
+                }
+
+                if (state.studentAnswers) {
+                    studentAnswers = { ...state.studentAnswers, ...studentAnswers };
+                }
+                if (state.customFeatures) customFeatures = state.customFeatures;
+                if (state.uploadedLetters) uploadedLetters = state.uploadedLetters;
+                if (state.settings) settings = state.settings;
+                if (state.refCounter) refCounter = state.refCounter;
+
+                localStorage.setItem('chuka_cached_state', JSON.stringify({ students, admins, questions, attendance, studentAnswers, customFeatures, uploadedLetters, settings, refCounter }));
+                if (document.getElementById('connectionBadge')) {
+                    document.getElementById('connectionBadge').innerHTML = `<i class="fa-solid fa-wifi mr-1.5 text-emerald-400"></i> Online (Appwrite Synced)`;
+                }
+            } catch (err) {
+                if (err.code === 404) {
+                    await saveState();
+                    return;
+                }
+
+                const cached = localStorage.getItem('chuka_cached_state');
+                if (cached) {
+                    const state = JSON.parse(cached);
+                    if (state.students) students = state.students;
+                    if (state.admins) admins = state.admins;
+                    if (state.questions) questions = state.questions;
+                    if (state.attendance) attendance = state.attendance;
+                    if (state.studentAnswers) studentAnswers = state.studentAnswers;
+                    if (state.customFeatures) customFeatures = state.customFeatures;
+                    if (state.uploadedLetters) uploadedLetters = state.uploadedLetters;
+                    if (state.settings) settings = state.settings;
+                    if (state.refCounter) refCounter = state.refCounter;
+                }
+                if (document.getElementById('connectionBadge')) {
+                    document.getElementById('connectionBadge').innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1.5 text-amber-400"></i> Offline Mode Active (Local Sync)`;
+                }
+            }
+            if (!isBackground && typeof populateTimeFields === 'function') {
+                populateTimeFields();
+            }
+        }
+
+
+        function populateTimeFields() {
+            const strictToggle = document.getElementById('toggleStrictTime');
+            if (strictToggle) strictToggle.checked = !!settings.enforceTime;
+
+            if (document.getElementById('cfgSignInStart')) {
+                document.getElementById('cfgSignInStart').value = settings.signInStart || "06:00";
+                document.getElementById('cfgSignInEnd').value = settings.signInEnd || "09:00";
+                document.getElementById('cfgSignOutStart').value = settings.signOutStart || "16:00";
+                document.getElementById('cfgSignOutEnd').value = settings.signOutEnd || "17:00";
+            }
+        }
+
+                async function saveState() {
+            const payload = { students, admins, questions, attendance, studentAnswers, customFeatures, uploadedLetters, settings, refCounter };
+            const stringifiedPayload = JSON.stringify(payload);
+            localStorage.setItem('chuka_cached_state', stringifiedPayload);
+
+            try {
+                await tablesDB.updateRow({
+                    databaseId: DATABASE_ID,
+                    tableId: TABLE_ID,
+                    rowId: ROW_ID,
+                    data: { data: stringifiedPayload }
+                });
+                if (document.getElementById('connectionBadge')) {
+                    document.getElementById('connectionBadge').innerHTML = `<i class="fa-solid fa-wifi mr-1.5 text-emerald-400"></i> Online (Appwrite Synced)`;
+                }
+            } catch (err) {
+                if (err.code === 404) {
+                    try {
+                        await tablesDB.createRow({
+                            databaseId: DATABASE_ID,
+                            tableId: TABLE_ID,
+                            rowId: ROW_ID,
+                            data: { data: stringifiedPayload }
+                        });
+                        if (document.getElementById('connectionBadge')) {
+                            document.getElementById('connectionBadge').innerHTML = `<i class="fa-solid fa-wifi mr-1.5 text-emerald-400"></i> Online (Appwrite Synced)`;
+                        }
+                        return;
+                    } catch (createErr) {
+                        console.error("Appwrite create error:", createErr);
+                    }
+                }
+                if (document.getElementById('connectionBadge')) {
+                    document.getElementById('connectionBadge').innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1.5 text-amber-400"></i> Offline Mode Active (Saved Locally)`;
+                }
+            }
+        }
+
+                    }
+                }
+                if(document.getElementById('connectionBadge')) {
+                    document.getElementById('connectionBadge').innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1.5 text-amber-400"></i> Offline Mode Active (Saved Locally)`;
+                }
+            }
+        }
+
+        async function saveAdminTimeSettings() {
+            settings.signInStart = document.getElementById('cfgSignInStart').value || "06:00";
+            settings.signInEnd = document.getElementById('cfgSignInEnd').value || "09:00";
+            settings.signOutStart = document.getElementById('cfgSignOutStart').value || "16:00";
+            settings.signOutEnd = document.getElementById('cfgSignOutEnd').value || "17:00";
+            settings.enforceTime = document.getElementById('toggleStrictTime').checked;
+
+            await saveState();
+            alert("Attendance time rules updated and saved successfully!");
+            closeModal('masterMenuModal');
+        }
+
+        async function toggleSetting(key) {
+            if (key === 'enforceTime') {
+                const toggle = document.getElementById('toggleStrictTime');
+                if (toggle) settings.enforceTime = toggle.checked;
+            }
+            await saveState();
+        }
+
+        function timeToMinutes(timeStr) {
+            if (!timeStr) return 0;
+            const parts = timeStr.split(':');
+            return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        }
+
+        function openGuidelineModal(title) {
+            document.getElementById('guidelineTitle').innerText = title;
+            document.getElementById('guidelineContent').innerHTML = guidelineLibrary[title] || "<p>Detailed clinical guidelines and standard operating procedures for Chuka Level 5 Hospital.</p>";
+            openModal('guidelineModal');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const idInput = document.getElementById('loginId').value.trim();
+            const passInput = document.getElementById('loginPassword').value.trim();
+            const errBox = document.getElementById('loginError');
+            errBox.classList.add('hidden');
+
+            const foundAdmin = admins.find(a => a.id.toUpperCase() === idInput.toUpperCase() && a.password === passInput);
+            if (foundAdmin) {
+                currentUser = { id: foundAdmin.id, name: foundAdmin.name, role: 'admin', rights: foundAdmin.rights, dept: 'Clinical Attachment Supervisor' };
+                localStorage.setItem('chuka_user_session', JSON.stringify(currentUser));
+                renderPortalView();
+                return;
+            }
+
+            const foundStudent = students.find(s => s.id.toUpperCase() === idInput.toUpperCase() && s.password === passInput);
+            if (foundStudent) {
+                currentUser = { id: foundStudent.id, name: foundStudent.name, role: 'student', dept: foundStudent.dept };
+                localStorage.setItem('chuka_user_session', JSON.stringify(currentUser));
+                renderPortalView();
+                return;
+            }
+
+            document.getElementById('loginErrorText').innerText = "Invalid ID or Password!";
+            errBox.classList.remove('hidden');
+        }
+
+        function checkSession() {
+            const session = localStorage.getItem('chuka_user_session');
+            if (session) currentUser = JSON.parse(session);
+            renderPortalView();
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('chuka_user_session');
+            renderPortalView();
+        }
+
+        function renderPortalView() {
+            const loginView = document.getElementById('loginView');
+            const dashboardAppView = document.getElementById('dashboardAppView');
+            const adminView = document.getElementById('adminView');
+            const studentView = document.getElementById('studentView');
+            const globalBanner = document.getElementById('globalBanner');
+
+            if (!currentUser) {
+                loginView.classList.remove('hidden');
+                dashboardAppView.classList.add('hidden');
+                globalBanner.classList.add('hidden');
+                return;
+            }
+
+            loginView.classList.add('hidden');
+            dashboardAppView.classList.remove('hidden');
+            globalBanner.classList.remove('hidden');
+
+            document.getElementById('sidebarUserName').innerText = currentUser.name;
+            document.getElementById('sidebarUserRole').innerText = currentUser.id + (currentUser.role === 'admin' ? ` (${currentUser.rights})` : '');
+            document.getElementById('sidebarStatusText').innerText = currentUser.name + ' (' + currentUser.id + ')';
+            
+            const initials = currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            document.getElementById('sidebarUserInitials').innerText = initials;
+
+            if (currentUser.role === 'admin') {
+                adminView.classList.remove('hidden');
+                studentView.classList.add('hidden');
+                navigateToAdminTab('homeTab');
+            } else {
+                adminView.classList.add('hidden');
+                studentView.classList.remove('hidden');
+                navigateToStudentTab('studentHomeTab');
+            }
+            buildSidebarNav();
+            buildMasterMenu();
+        }
+
+        function buildSidebarNav() {
+            const nav = document.getElementById('sidebarNavLinks');
+            nav.innerHTML = '';
+
+            if (currentUser.role === 'admin') {
+                const items = [
+                    { title: 'Dashboard', icon: 'fa-house', tab: 'homeTab' },
+                    { title: 'Students Directory', icon: 'fa-users', tab: 'studentsTab' },
+                    { title: 'Attendance Logs', icon: 'fa-calendar-days', tab: 'loginsTab' },
+                    { title: 'Messaging & Broadcasts', icon: 'fa-comments', tab: 'messagingTab' },
+                    { title: 'Upload Questions', icon: 'fa-file-arrow-up', tab: 'questionsTab' },
+                    { title: 'Student Replies Inbox', icon: 'fa-inbox', tab: 'inboxTab' },
+                    { title: 'Custom Features', icon: 'fa-puzzle-piece', tab: 'featuresTab' },
+                    { title: 'Recommendation Letters', icon: 'fa-award', tab: 'recommendationsTab' }
+                ];
+                items.forEach(i => {
+                    nav.innerHTML += `
+                        <button onclick="navigateToAdminTab('${i.tab}')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-slate-300 hover:text-white">
+                            <i class="fa-solid ${i.icon} text-teal-400 w-5"></i>
+                            <span>${i.title}</span>
+                        </button>
+                    `;
+                });
+            } else {
+                const items = [
+                    { title: 'Student Dashboard', icon: 'fa-house', tab: 'studentHomeTab' },
+                    { title: 'Clock In / Out', icon: 'fa-fingerprint', tab: 'studentClockTab' },
+                    { title: 'Attendance History', icon: 'fa-calendar-days', tab: 'studentLogTab' },
+                    { title: 'Broadcasts & Inbox', icon: 'fa-inbox', tab: 'studentInboxTab' },
+                    { title: 'Admin Features', icon: 'fa-puzzle-piece', tab: 'studentFeaturesTab' },
+                    { title: 'Profile & Contacts', icon: 'fa-user-gear', tab: 'studentProfileTab' }
+                ];
+                items.forEach(i => {
+                    nav.innerHTML += `
+                        <button onclick="navigateToStudentTab('${i.tab}')" class="w-full text-left px-4 py-3 rounded-xl hover:bg-white/10 transition flex items-center gap-3 text-slate-300 hover:text-white">
+                            <i class="fa-solid ${i.icon} text-teal-400 w-5"></i>
+                            <span>${i.title}</span>
+                        </button>
+                    `;
+                });
+            }
+        }
+
+        function buildMasterMenu() {
+            const list = document.getElementById('masterMenuList');
+            list.innerHTML = '';
+            const rulesSection = document.getElementById('adminRulesSectionModal');
+
+            if (currentUser.role === 'admin') {
+                if (rulesSection) rulesSection.classList.remove('hidden');
+                const items = [
+                    { title: 'Admin Home', icon: 'fa-house', tab: 'homeTab' },
+                    { title: 'Bulk Messaging & WhatsApp', icon: 'fa-comments', tab: 'messagingTab' },
+                    { title: 'Attendance & Archives', icon: 'fa-list-check', tab: 'loginsTab' },
+                    { title: 'Students Directory', icon: 'fa-users', tab: 'studentsTab' },
+                    { title: 'Upload Questions', icon: 'fa-file-arrow-up', tab: 'questionsTab' },
+                    { title: 'Student Replies Inbox', icon: 'fa-inbox', tab: 'inboxTab' },
+                    { title: 'Custom Features', icon: 'fa-puzzle-piece', tab: 'featuresTab' },
+                    { title: 'Recommendation Letters', icon: 'fa-award', tab: 'recommendationsTab' }
+                ];
+                items.forEach(i => {
+                    list.innerHTML += `
+                        <div onclick="navigateToAdminTab('${i.tab}')" class="p-4 bg-slate-50 hover:bg-teal-50 border border-slate-200/80 rounded-2xl cursor-pointer transition-all flex items-center space-x-3.5 shadow-sm transform hover:scale-[1.02]">
+                            <div class="w-11 h-11 bg-teal-700 text-white rounded-xl flex items-center justify-center text-base shadow-sm"><i class="fa-solid ${i.icon}"></i></div>
+                            <div class="font-bold text-sm text-slate-800">${i.title}</div>
+                        </div>
+                    `;
+                });
+            } else {
+                if (rulesSection) rulesSection.classList.add('hidden');
+                const items = [
+                    { title: 'Student Home', icon: 'fa-house', tab: 'studentHomeTab' },
+                    { title: 'Clock In / Out', icon: 'fa-fingerprint', tab: 'studentClockTab' },
+                    { title: 'Attendance History', icon: 'fa-calendar-days', tab: 'studentLogTab' },
+                    { title: 'Broadcasts & Inbox', icon: 'fa-inbox', tab: 'studentInboxTab' },
+                    { title: 'Admin Features', icon: 'fa-puzzle-piece', tab: 'studentFeaturesTab' },
+                    { title: 'Profile & Contacts', icon: 'fa-user-gear', tab: 'studentProfileTab' }
+                ];
+                items.forEach(i => {
+                    list.innerHTML += `
+                        <div onclick="navigateToStudentTab('${i.tab}')" class="p-4 bg-slate-50 hover:bg-teal-50 border border-slate-200/80 rounded-2xl cursor-pointer transition-all flex items-center space-x-3.5 shadow-sm transform hover:scale-[1.02]">
+                            <div class="w-11 h-11 bg-teal-700 text-white rounded-xl flex items-center justify-center text-base shadow-sm"><i class="fa-solid ${i.icon}"></i></div>
+                            <div class="font-bold text-sm text-slate-800">${i.title}</div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        function navigateToAdminTab(tabName) {
+            closeModal('masterMenuModal');
+            document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`adminTab-${tabName}`).classList.remove('hidden');
+            if (tabName === 'homeTab') renderAdminDashboard();
+            if (tabName === 'loginsTab') renderAttendanceLogs();
+            if (tabName === 'messagingTab') populateMessagingRecipientDropdown();
+            if (tabName === 'recommendationsTab') { populateRecommendationDropdown(); populateUploadLetterDropdown(); renderUploadedLetters(); }
+        }
+
+        function navigateToStudentTab(tabName) {
+            closeModal('masterMenuModal');
+            document.querySelectorAll('.student-tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`studentTab-${tabName}`).classList.remove('hidden');
+            if (tabName === 'studentHomeTab') renderStudentDashboard();
+            if (tabName === 'studentProfileTab') loadStudentProfileFields();
+        }
+
+        function renderAdminDashboard() {
+            const todayStr = new Date().toLocaleDateString('en-CA');
+            const todayCount = attendance.filter(a => a.date === todayStr && a.signInTime).length;
+            
+            document.getElementById('statTotalStudents').innerText = students.length;
+            document.getElementById('statTodaySignins').innerText = todayCount;
+            document.getElementById('statPendingSubmissions').innerText = Object.keys(studentAnswers).length;
+
+            renderAttendanceLogs();
+            renderStudentDirectory();
+            renderAdminsDirectory();
+            renderAdminQuestions();
+            renderAdminInbox();
+            renderAdminFeatures();
+            populateRecommendationDropdown();
+            populateUploadLetterDropdown();
+            renderUploadedLetters();
+            populateTimeFields();
+        }
+
+        function populateMessagingRecipientDropdown() {
+            const select = document.getElementById('msgRecipient');
+            select.innerHTML = `<option value="ALL">📢 Broadcast to ALL Registered Students</option>`;
+            students.forEach(s => {
+                select.innerHTML += `<option value="${s.id}">👤 Send to: ${s.name} (REG: ${s.id})</option>`;
+            });
+        }
+
+        async function handleSendBroadcastMessage(event) {
+            event.preventDefault();
+            const recipient = document.getElementById('msgRecipient').value;
+            const channel = document.getElementById('msgChannel').value;
+            const subject = document.getElementById('msgSubject').value.trim();
+            const body = document.getElementById('msgBody').value.trim();
+            const fileInput = document.getElementById('msgFile');
+            let fileName = null, fileData = null;
+
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                if (file.size > 40 * 1024 * 1024) { alert("File exceeds 40MB limit."); return; }
+                fileName = file.name;
+                fileData = await readFileAsDataURL(file);
+            }
+
+            let targets = [];
+            if (recipient === 'ALL') {
+                targets = students;
+            } else {
+                const found = students.find(s => s.id === recipient);
+                if (found) targets.push(found);
+            }
+
+            if (targets.length === 0) { alert("No valid recipients found."); return; }
+
+            if (channel === 'whatsapp') {
+                let phoneList = targets.map(t => t.phone).filter(p => !!p);
+                if (phoneList.length === 0) { alert("Error: Selected students have no WhatsApp phone numbers registered."); return; }
+                
+                const fullMsg = `*${subject}*\n\n${body}${fileName ? '\n\n[Attached File: ' + fileName + ']' : ''}`;
+                const encoded = encodeURIComponent(fullMsg);
+                
+                window.open(`https://api.whatsapp.com/send?phone=${phoneList[0].replace(/[^0-9]/g, '')}&text=${encoded}`, '_blank');
+                alert(`WhatsApp Dispatch initiated successfully for ${targets.length} student(s)!`);
+            } else if (channel === 'email') {
+                let emailList = targets.map(t => t.email).filter(e => !!e);
+                if (emailList.length === 0) { alert("Error: Selected students have no email addresses registered."); return; }
+                
+                const mailtoLink = `mailto:${emailList.join(',')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body + (fileName ? '\n\n[Attachment: ' + fileName + ']' : ''))}`;
+                window.location.href = mailtoLink;
+                alert(`Email Client triggered for ${emailList.length} recipient(s) with Subject and Attachments note.`);
+            } else {
+                targets.forEach(t => {
+                    const qId = 'msg-' + Date.now() + '-' + Math.floor(Math.random()*1000);
+                    questions.unshift({
+                        id: qId,
+                        recipientId: recipient,
+                        title: subject,
+                        category: 'Admin Broadcast',
+                        deadline: 'Immediate Response Required',
+                        body: body,
+                        fileName: fileName,
+                        fileData: fileData
+                    });
+                });
+                await saveState();
+                alert(`In-App Portal Notification successfully sent to ${targets.length} recipient(s)!`);
+            }
+        }
+
+        function renderAttendanceLogs() {
+            const dateInput = document.getElementById('attendanceFilterDate');
+            const selectedDate = dateInput ? dateInput.value : new Date().toLocaleDateString('en-CA');
+
+            const tbody = document.getElementById('attendanceTableBody');
+            tbody.innerHTML = '';
+
+            const filteredLogs = attendance.filter(log => log.date === selectedDate);
+
+            if (filteredLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-500 font-medium">No attendance records found for ${selectedDate}.</td></tr>`;
+            } else {
+                filteredLogs.forEach((log) => {
+                    const actualIndex = attendance.findIndex(a => a.studentId === log.studentId && a.date === log.date);
+                    const studentObj = students.find(s => s.id === log.studentId);
+                    const gender = studentObj ? (studentObj.gender || 'Not Set') : 'N/A';
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-4 font-bold text-slate-900">${escapeHtml(log.studentName)}</td>
+                            <td class="p-4 font-mono text-teal-700 text-xs font-bold">${escapeHtml(log.studentId)}</td>
+                            <td class="p-4 text-slate-600 text-xs"><span class="px-2.5 py-1 bg-slate-100 rounded-lg font-bold">${gender}</span></td>
+                            <td class="p-4 text-slate-600">${log.date}</td>
+                            <td class="p-4 text-emerald-600 font-bold">${log.signInTime || '--'}</td>
+                            <td class="p-4 text-indigo-600 font-bold">${log.signOutTime || '--'}</td>
+                            <td class="p-4 text-right"><button onclick="adminDeleteAttendance(${actualIndex})" class="px-3 py-1.5 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 text-xs font-bold transition" title="Delete Log"><i class="fa-solid fa-trash"></i></button></td>
+                        </tr>
+                    `;
+                });
+            }
+
+            renderAbsenteeReport(selectedDate, filteredLogs);
+        }
+
+        function renderAbsenteeReport(selectedDate, dayLogs) {
+            const absenteeBody = document.getElementById('absenteeTableBody');
+            absenteeBody.innerHTML = '';
+
+            const todayStr = new Date().toLocaleDateString('en-CA');
+            const isToday = (selectedDate === todayStr);
+
+            let statusList = [];
+            students.forEach(student => {
+                const log = dayLogs.find(l => l.studentId === student.id);
+                if (!log || !log.signInTime) {
+                    statusList.push({ student, reason: `Failed to Sign In on ${selectedDate} (Absent)`, type: 'absent' });
+                } else if (!log.signOutTime) {
+                    if (isToday) {
+                        statusList.push({ student, reason: `Signed in at ${log.signInTime} — Active on duty (Pending Sign-Out)`, type: 'active' });
+                    } else {
+                        statusList.push({ student, reason: `Signed in on ${selectedDate} but Failed to Sign Out`, type: 'incomplete' });
+                    }
+                }
+            });
+
+            document.getElementById('absenteeCountBadge').innerText = `${statusList.length} Status Notices`;
+
+            if (statusList.length === 0) {
+                absenteeBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-emerald-600 font-bold"><i class="fa-solid fa-circle-check mr-1.5 text-base"></i> All registered students fully completed attendance for ${selectedDate}!</td></tr>`;
+                return;
+            }
+
+            statusList.forEach(item => {
+                let badgeColor = item.type === 'absent' ? 'bg-red-50 border-red-200 text-red-600' : (item.type === 'incomplete' ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-cyan-50 border-cyan-200 text-cyan-800');
+                absenteeBody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-4 font-bold text-slate-900">${escapeHtml(item.student.name)}</td>
+                        <td class="p-4 font-mono text-xs font-bold text-teal-700">${escapeHtml(item.student.id)}</td>
+                        <td class="p-4 text-xs text-slate-600 font-medium">
+                            <div><i class="fa-solid fa-envelope text-slate-400 mr-1"></i> ${escapeHtml(item.student.email || 'No email')}</div>
+                            <div><i class="fa-brands fa-whatsapp text-emerald-600 mr-1"></i> ${escapeHtml(item.student.phone || 'No phone')}</div>
+                        </td>
+                        <td class="p-4 font-bold text-xs"><span class="px-2.5 py-1 border rounded-xl ${badgeColor}">${item.reason}</span></td>
+                        <td class="p-4 text-right text-xs">
+                            ${item.student.phone ? `<a href="https://api.whatsapp.com/send?phone=${item.student.phone.replace(/[^0-9]/g, '')}&text=${encodeURIComponent('Hello ' + item.student.name + ', please note your attendance record for ' + selectedDate + ' is incomplete.')}" target="_blank" class="px-3 py-1.5 bg-emerald-600 text-white rounded-xl font-bold inline-flex items-center gap-1.5 hover:bg-emerald-500 transition"><i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp</a>` : '<span class="text-slate-400 font-medium">No Phone</span>'}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function adminDeleteAttendance(index) {
+            if (confirm("Are you sure you want to delete this student's attendance log?")) {
+                attendance.splice(index, 1);
+                await saveState();
+                renderAttendanceLogs();
+            }
+        }
+
+        function renderStudentDirectory() {
+            const grid = document.getElementById('studentsDirectoryGrid');
+            grid.innerHTML = '';
+            students.forEach((s, index) => {
+                grid.innerHTML += `
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-2.5 shadow-sm relative">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono font-bold px-2.5 py-1 bg-teal-100 text-teal-800 rounded-lg">REG: ${s.id}</span>
+                            <div class="space-x-1">
+                                <button onclick="openEditStudentModal(${index})" class="text-teal-700 hover:text-teal-900 text-xs p-1.5 rounded-lg bg-teal-50" title="Edit Student & Contacts"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button onclick="adminDeleteStudent(${index})" class="text-red-500 hover:text-red-700 text-xs p-1.5 rounded-lg bg-red-50" title="Delete Student"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="font-extrabold text-slate-900">${escapeHtml(s.name)}</div>
+                        <div class="text-xs text-slate-600 font-medium space-y-1">
+                            <div><i class="fa-solid fa-envelope text-slate-400 mr-1"></i> ${escapeHtml(s.email || 'Not provided')}</div>
+                            <div><i class="fa-brands fa-whatsapp text-emerald-600 mr-1"></i> ${escapeHtml(s.phone || 'Not provided')}</div>
+                        </div>
+                        <div class="text-xs text-slate-500 font-semibold flex justify-between pt-2 border-t border-slate-200">
+                            <span>Gender: <strong class="text-teal-800">${s.gender || 'Male'}</strong></span>
+                            <span>Pass: <code class="text-amber-700 font-bold">${s.password}</code></span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function openEditStudentModal(index) {
+            const s = students[index];
+            document.getElementById('editStudentIndex').value = index;
+            document.getElementById('editStudentName').value = s.name;
+            document.getElementById('editStudentReg').value = s.id;
+            document.getElementById('editStudentEmail').value = s.email || '';
+            document.getElementById('editStudentPhone').value = s.phone || '';
+            document.getElementById('editStudentGender').value = s.gender || 'Male';
+            document.getElementById('editStudentPass').value = s.password;
+            openModal('editStudentModal');
+        }
+
+        async function handleEditStudent(e) {
+            e.preventDefault();
+            const index = parseInt(document.getElementById('editStudentIndex').value);
+            students[index].name = document.getElementById('editStudentName').value.trim();
+            students[index].id = document.getElementById('editStudentReg').value.trim();
+            students[index].email = document.getElementById('editStudentEmail').value.trim();
+            students[index].phone = document.getElementById('editStudentPhone').value.trim();
+            students[index].gender = document.getElementById('editStudentGender').value;
+            students[index].password = document.getElementById('editStudentPass').value.trim();
+            await saveState();
+            closeModal('editStudentModal');
+            renderStudentDirectory();
+            populateRecommendationDropdown();
+            populateUploadLetterDropdown();
+            alert("Student details and contacts updated successfully!");
+        }
+
+        function renderAdminsDirectory() {
+            const grid = document.getElementById('adminsDirectoryGrid');
+            grid.innerHTML = '';
+            admins.forEach((a, index) => {
+                grid.innerHTML += `
+                    <div class="bg-slate-50 border border-amber-300/80 rounded-2xl p-4 space-y-2.5 shadow-sm relative">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono font-bold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg">${a.id}</span>
+                            ${index > 0 ? `<button onclick="adminDeleteAdmin(${index})" class="text-red-500 text-xs p-1.5 bg-red-50 rounded-lg"><i class="fa-solid fa-trash"></i></button>` : ''}
+                        </div>
+                        <div class="font-extrabold text-slate-900">${escapeHtml(a.name)}</div>
+                        <div class="text-xs text-amber-700 font-bold"><i class="fa-solid fa-shield-halved mr-1"></i>${a.rights}</div>
+                    </div>
+                `;
+            });
+        }
+
+        async function handleAddStudent(e) {
+            e.preventDefault();
+            const name = document.getElementById('newStudentName').value.trim();
+            const id = document.getElementById('newStudentReg').value.trim();
+            const email = document.getElementById('newStudentEmail').value.trim();
+            const phone = document.getElementById('newStudentPhone').value.trim();
+            const gender = document.getElementById('newStudentGender').value;
+            const password = document.getElementById('newStudentPass').value.trim();
+            students.push({ id, name, email, phone, gender, password, dept: 'Department of Nutrition & Dietetics' });
+            await saveState();
+            closeModal('addStudentModal');
+            renderStudentDirectory();
+            populateRecommendationDropdown();
+            populateUploadLetterDropdown();
+            alert("Student registered with email and WhatsApp contacts successfully!");
+        }
+
+        async function adminDeleteStudent(index) {
+            if (confirm("Delete student?")) {
+                students.splice(index, 1);
+                await saveState();
+                renderStudentDirectory();
+                populateRecommendationDropdown();
+                populateUploadLetterDropdown();
+            }
+        }
+
+        async function adminDeleteAdmin(index) {
+            if (confirm("Revoke admin rights?")) {
+                admins.splice(index, 1);
+                await saveState();
+                renderAdminsDirectory();
+            }
+        }
+
+        async function handlePostQuestion(e) {
+            e.preventDefault();
+            const title = document.getElementById('questTitle').value.trim();
+            const category = document.getElementById('questCategory').value;
+            const deadline = document.getElementById('questDeadline').value;
+            const body = document.getElementById('questBody').value;
+            const fileInput = document.getElementById('questFile');
+            let fileName = null, fileData = null;
+
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                if (file.size > 40 * 1024 * 1024) { alert("File exceeds 40MB limit."); return; }
+                fileName = file.name;
+                fileData = await readFileAsDataURL(file);
+            }
+
+            questions.unshift({ id: 'q-' + Date.now(), recipientId: 'ALL', title, category, deadline: deadline || 'No deadline', body, fileName, fileData });
+            await saveState();
+            document.getElementById('questionForm').reset();
+            renderAdminQuestions();
+            alert("Question & Attachment published successfully!");
+        }
+
+        function renderAdminQuestions() {
+            const list = document.getElementById('adminQuestionsList');
+            list.innerHTML = '';
+            if (questions.length === 0) { list.innerHTML = `<div class="p-6 text-center text-slate-500 font-medium">No questions posted yet.</div>`; return; }
+            questions.forEach(q => {
+                list.innerHTML += `
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 space-y-2.5 shadow-sm">
+                        <div class="flex justify-between items-center"><span class="text-xs text-teal-800 font-bold bg-teal-100 px-2.5 py-0.5 rounded-lg">${escapeHtml(q.category)}</span><button onclick="deleteQuestion('${q.id}')" class="text-red-500 text-xs p-1.5 bg-red-50 rounded-lg"><i class="fa-solid fa-trash"></i></button></div>
+                        <h4 class="font-extrabold text-slate-900 text-base">${escapeHtml(q.title)}</h4>
+                        <p class="text-sm text-slate-600 font-medium pre-wrap">${escapeHtml(q.body)}</p>
+                        ${q.fileName ? `<a href="${q.fileData}" download="${q.fileName}" class="text-xs text-teal-700 font-bold inline-flex items-center gap-1 bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-200"><i class="fa-solid fa-download"></i> Download Attachment: ${escapeHtml(q.fileName)}</a>` : ''}
+                    </div>
+                `;
+            });
+        }
+
+        async function deleteQuestion(id) {
+            if (confirm("Delete question?")) {
+                questions = questions.filter(q => q.id !== id);
+                await saveState();
+                renderAdminQuestions();
+            }
+        }
+
+        async function handleCreateFeature(e) {
+            e.preventDefault();
+            const title = document.getElementById('featTitle').value.trim();
+            const desc = document.getElementById('featDesc').value.trim();
+            const fileInput = document.getElementById('featFile');
+            let fileName = null, fileData = null;
+
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                if (file.size > 40 * 1024 * 1024) { alert("File exceeds 40MB limit."); return; }
+                fileName = file.name;
+                fileData = await readFileAsDataURL(file);
+            }
+
+            customFeatures.unshift({
+                id: 'feat-' + Date.now(),
+                title, desc, fileName, fileData,
+                date: new Date().toLocaleDateString()
+            });
+
+            await saveState();
+            alert("Custom feature module successfully published to students!");
+            e.target.reset();
+            renderAdminFeatures();
+        }
+
+        function renderAdminFeatures() {
+            const list = document.getElementById('adminFeaturesList');
+            list.innerHTML = '';
+            if (customFeatures.length === 0) {
+                list.innerHTML = `<div class="p-6 text-center text-slate-500 font-medium">No custom features added yet.</div>`;
+                return;
+            }
+
+            customFeatures.forEach(f => {
+                list.innerHTML += `
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 space-y-2.5 shadow-sm">
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-extrabold text-slate-900 text-base">${escapeHtml(f.title)}</h4>
+                            <button onclick="deleteFeature('${f.id}')" class="text-red-500 text-xs p-1.5 bg-red-50 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                        <p class="text-sm text-slate-600 font-medium pre-wrap">${escapeHtml(f.desc)}</p>
+                        ${f.fileName ? `<a href="${f.fileData}" download="${f.fileName}" class="text-xs text-teal-700 font-bold inline-flex items-center gap-1 bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-200"><i class="fa-solid fa-download"></i> ${escapeHtml(f.fileName)}</a>` : ''}
+                    </div>
+                `;
+            });
+        }
+
+        async function deleteFeature(id) {
+            if (confirm("Delete this custom feature?")) {
+                customFeatures = customFeatures.filter(f => f.id !== id);
+                await saveState();
+                renderAdminFeatures();
+            }
+        }
+
+        function renderAdminInbox() {
+            const inboxList = document.getElementById('adminSubmissionsList');
+            inboxList.innerHTML = '';
+            let count = 0;
+            for (const key in studentAnswers) {
+                const parts = key.split('_');
+                const studentId = parts[0];
+                const student = students.find(s => s.id === studentId);
+                const ans = studentAnswers[key];
+                count++;
+                
+                const qId = parts.slice(1).join('_');
+                const matchedQ = questions.find(q => q.id === qId);
+                const topicTitle = matchedQ ? matchedQ.title : 'Direct Student Reply / Submission';
+
+                inboxList.innerHTML += `
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 space-y-3.5 shadow-sm">
+                        <div class="flex flex-col sm:flex-row justify-between text-xs text-emerald-800 font-bold gap-1 border-b border-slate-200 pb-2.5">
+                            <span>👤 ${student ? student.name : studentId} (REG: ${studentId}) — Email: ${student && student.email ? student.email : 'N/A'}</span>
+                            <span class="text-slate-500 font-mono">🕒 ${ans.time || ''}</span>
+                        </div>
+                        <div class="text-xs font-bold text-indigo-700"><i class="fa-solid fa-comment-dots mr-1"></i> Regarding: ${escapeHtml(topicTitle)}</div>
+                        <div class="text-sm text-slate-800 font-medium pre-wrap bg-white p-4 rounded-xl border border-slate-200 shadow-inner">${escapeHtml(ans.text || '')}</div>
+                        ${ans.fileName ? `<a href="${ans.fileData}" download="${ans.fileName}" class="text-xs text-teal-700 inline-block font-bold bg-teal-50 px-3.5 py-2 rounded-xl border border-teal-200"><i class="fa-solid fa-download"></i> Download Attached Student File (${escapeHtml(ans.fileName)})</a>` : ''}
+                        <div class="space-y-2 pt-3 border-t border-slate-200">
+                            <label class="block text-xs font-bold text-slate-600 uppercase">Supervisor Direct Reply (Sends back to student portal)</label>
+                            <textarea id="reply_${key}" rows="2" placeholder="Write feedback or reply..." class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-900">${escapeHtml(ans.supervisorReply || '')}</textarea>
+                            <div class="flex justify-end"><button onclick="sendSupervisorReply('${key}')" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 transition"><i class="fa-solid fa-paper-plane"></i> Send Feedback to Student</button></div>
+                        </div>
+                    </div>
+                `;
+            }
+            document.getElementById('totalSubmissionsCount').innerText = `${count} Replies / Submissions`;
+            if (count === 0) {
+                inboxList.innerHTML = `<div class="p-8 text-center text-slate-500 font-medium"><i class="fa-solid fa-inbox text-4xl mb-2.5 text-slate-300 block"></i>No student replies or submissions received yet.</div>`;
+            }
+        }
+
+        async function sendSupervisorReply(key) {
+            const text = document.getElementById(`reply_${key}`).value.trim();
+            if (studentAnswers[key]) {
+                studentAnswers[key].supervisorReply = text;
+                await saveState();
+                alert("Feedback sent successfully to student portal inbox!");
+                renderAdminInbox();
+            }
+        }
+
+        function populateRecommendationDropdown() {
+            const select = document.getElementById('recommendStudentSelect');
+            if(select) {
+                select.innerHTML = '';
+                students.forEach(s => select.innerHTML += `<option value="${s.id}">${s.name} (REG: ${s.id})</option>`);
+            }
+        }
+
+        function populateUploadLetterDropdown() {
+            const select = document.getElementById('uploadLetterStudentId');
+            if(select) {
+                select.innerHTML = '';
+                students.forEach(s => select.innerHTML += `<option value="${s.id}">${s.name} (REG: ${s.id})</option>`);
+            }
+        }
+
+        async function handleManualLetterUpload(e) {
+            e.preventDefault();
+            const studentId = document.getElementById('uploadLetterStudentId').value;
+            const fileInput = document.getElementById('manualLetterFile');
+            if (!fileInput.files || !fileInput.files[0]) { alert("Please select a file."); return; }
+            
+            const file = fileInput.files[0];
+            if (file.size > 40 * 1024 * 1024) { alert("File exceeds 40MB limit."); return; }
+            
+            const fileName = file.name;
+            const fileData = await readFileAsDataURL(file);
+            const student = students.find(s => s.id === studentId);
+
+            uploadedLetters.push({
+                id: 'letter-' + Date.now(),
+                studentId,
+                studentName: student ? student.name : studentId,
+                fileName,
+                fileData,
+                date: new Date().toLocaleDateString()
+            });
+
+            await saveState();
+            alert("Recommendation letter successfully uploaded and archived!");
+            e.target.reset();
+            renderUploadedLetters();
+        }
+
+        function renderUploadedLetters() {
+            const list = document.getElementById('uploadedLettersList');
+            if(!list) return;
+            list.innerHTML = '';
+            if (uploadedLetters.length === 0) {
+                list.innerHTML = `<div class="p-4 text-center text-slate-500 text-xs font-medium">No custom recommendation letters uploaded yet.</div>`;
+                return;
+            }
+
+            uploadedLetters.forEach(l => {
+                list.innerHTML += `
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between text-xs">
+                        <div>
+                            <div class="font-extrabold text-slate-900">${escapeHtml(l.studentName)} <span class="text-teal-700 font-mono">(REG: ${l.studentId})</span></div>
+                            <div class="text-slate-500 mt-0.5"><i class="fa-solid fa-file-lines text-teal-600 mr-1"></i> ${escapeHtml(l.fileName)} — Uploaded on ${l.date}</div>
+                        </div>
+                        <div class="space-x-2">
+                            <a href="${l.fileData}" download="${l.fileName}" class="px-3 py-1.5 bg-teal-700 text-white rounded-xl font-bold inline-flex items-center gap-1"><i class="fa-solid fa-download"></i> Download</a>
+                            <button onclick="deleteUploadedLetter('${l.id}')" class="px-3 py-1.5 bg-red-50 text-red-600 rounded-xl font-bold"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function deleteUploadedLetter(id) {
+            if (confirm("Delete this uploaded letter?")) {
+                uploadedLetters = uploadedLetters.filter(l => l.id !== id);
+                await saveState();
+                renderUploadedLetters();
+            }
+        }
+
+        async function generateRecommendationLetter() {
+            const studentId = document.getElementById('recommendStudentSelect').value;
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+            const isFemale = (student.gender || '').toLowerCase() === 'female';
+
+            document.getElementById('letterStudentName').innerText = student.name.toUpperCase();
+            document.getElementById('letterStudentReg').innerText = student.id;
+            
+            document.getElementById('letterRefNo').innerText = refCounter;
+            refCounter++;
+            await saveState();
+
+            document.getElementById('letterDate').innerText = new Date().toLocaleDateString('en-GB');
+
+            document.getElementById('pronounHeShe').innerText = isFemale ? 'she' : 'he';
+            document.getElementById('pronounHisHer').innerText = isFemale ? 'Her' : 'His';
+            document.getElementById('pronounHeShe2').innerText = isFemale ? 'she' : 'he';
+            document.getElementById('pronounHimHer').innerText = isFemale ? 'her' : 'him';
+            document.getElementById('pronounHimHer2').innerText = isFemale ? 'her' : 'him';
+
+            openModal('letterModal');
+        }
+
+        function renderStudentDashboard() {
+            document.getElementById('studentHeaderName').innerText = currentUser.name;
+            document.getElementById('studentRegBadge').innerText = currentUser.id;
+            document.getElementById('studentHeaderDept').innerText = currentUser.dept;
+
+            const inStart = settings.signInStart || "06:00";
+            const inEnd = settings.signInEnd || "09:00";
+            const outStart = settings.signOutStart || "16:00";
+            const outEnd = settings.signOutEnd || "17:00";
+
+            document.getElementById('studentClockWindowDisplay').innerText = 
+                `Morning Sign-In window: ${inStart} - ${inEnd} | Evening Sign-Out window: ${outStart} - ${outEnd}`;
+            document.getElementById('dispSignInRange').innerText = `${inStart} - ${inEnd}`;
+            document.getElementById('dispSignOutRange').innerText = `${outStart} - ${outEnd}`;
+
+            loadStudentProfileFields();
+            updateStudentDashboardUI();
+            renderStudentAttendanceLog();
+            renderStudentInbox();
+            renderStudentFeatures();
+            renderStudentMyLetters();
+        }
+
+        function renderStudentMyLetters() {
+            const list = document.getElementById('studentMyLettersList');
+            if(!list) return;
+            list.innerHTML = '';
+            const myLetters = uploadedLetters.filter(l => l.studentId === currentUser.id);
+
+            if (myLetters.length === 0) {
+                list.innerHTML = `<div class="p-4 text-center text-slate-500 text-xs font-medium">No custom recommendation letters uploaded for you yet. Your supervisor will upload your signed completion letter here.</div>`;
+                return;
+            }
+
+            myLetters.forEach(l => {
+                list.innerHTML += `
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between text-xs">
+                        <div>
+                            <div class="font-extrabold text-slate-900"><i class="fa-solid fa-award text-amber-600 mr-1.5"></i> ${escapeHtml(l.fileName)}</div>
+                            <div class="text-slate-500 mt-0.5">Uploaded on ${l.date} by Hospital Supervisor</div>
+                        </div>
+                        <a href="${l.fileData}" download="${l.fileName}" class="px-4 py-2 bg-teal-700 text-white rounded-xl font-bold inline-flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-download"></i> Download Verified Letter</a>
+                    </div>
+                `;
+            });
+        }
+
+        function loadStudentProfileFields() {
+            const currentStu = students.find(s => s.id.toUpperCase() === currentUser.id.toUpperCase());
+            if (currentStu) {
+                if(document.getElementById('editStudentProfileName')) document.getElementById('editStudentProfileName').value = currentStu.name || '';
+                if(document.getElementById('editStudentProfileEmail')) document.getElementById('editStudentProfileEmail').value = currentStu.email || '';
+                if(document.getElementById('editStudentProfilePhone')) document.getElementById('editStudentProfilePhone').value = currentStu.phone || '';
+                if(document.getElementById('editStudentProfileGender')) document.getElementById('editStudentProfileGender').value = currentStu.gender || 'Male';
+                if(document.getElementById('editStudentProfileDept')) document.getElementById('editStudentProfileDept').value = currentStu.dept || 'Department of Nutrition & Dietetics';
+                if(document.getElementById('editStudentProfilePass')) document.getElementById('editStudentProfilePass').value = currentStu.password || '';
+            }
+        }
+
+        function updateStudentDashboardUI() {
+            const todayStr = new Date().toLocaleDateString('en-CA');
+            const record = attendance.find(a => a.studentId === currentUser.id && a.date === todayStr);
+            const badge = document.getElementById('todayStatusBadge');
+            const btnIn = document.getElementById('btnSignIn');
+            const btnOut = document.getElementById('btnSignOut');
+
+            if (!record) { badge.innerText = "Status: Not Signed In Today"; btnIn.disabled = false; btnOut.disabled = true; }
+            else if (record.signInTime && !record.signOutTime) { badge.innerText = `Signed In at ${record.signInTime}`; btnIn.disabled = true; btnOut.disabled = false; }
+            else { badge.innerText = "Attendance Complete"; btnIn.disabled = true; btnOut.disabled = true; }
+
+            document.getElementById('homeStudentStatus').innerText = record && record.signInTime ? `Signed In (${record.signInTime})` : "Pending";
+            document.getElementById('homeAssignedCount').innerText = questions.filter(q => q.recipientId === 'ALL' || q.recipientId === currentUser.id).length;
+            document.getElementById('homeModulesCount').innerText = customFeatures.length;
+        }
+
+        function renderStudentAttendanceLog() {
+            const tbody = document.getElementById('studentAttendanceTableBody');
+            tbody.innerHTML = '';
+            attendance.filter(a => a.studentId === currentUser.id).reverse().forEach(log => {
+                tbody.innerHTML += `<tr><td class="p-4 font-bold text-slate-900">${log.date}</td><td class="p-4 text-emerald-600 font-bold">${log.signInTime || '--'}</td><td class="p-4 text-indigo-600 font-bold">${log.signOutTime || '--'}</td><td class="p-4"><span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold border border-emerald-200">Verified</span></td></tr>`;
+            });
+        }
+
+        function renderStudentInbox() {
+            const list = document.getElementById('studentQuestionsList');
+            list.innerHTML = '';
+            
+            const myQuestions = questions.filter(q => q.recipientId === 'ALL' || q.recipientId === currentUser.id);
+
+            if (myQuestions.length === 0) { 
+                list.innerHTML = `<div class="p-6 text-center text-slate-500 font-medium">No broadcasts or questions assigned yet.</div>`; 
+                return; 
+            }
+
+            myQuestions.forEach(q => {
+                const key = `${currentUser.id}_${q.id}`;
+                const ans = studentAnswers[key];
+                const hasAnswered = ans && (ans.text || ans.fileName);
+
+                list.innerHTML += `
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 space-y-4 shadow-sm">
+                        <div class="flex justify-between text-xs font-bold"><span class="text-teal-800 bg-teal-100 px-3 py-1 rounded-xl">${escapeHtml(q.category)}</span><span class="text-slate-500 font-mono">Deadline: ${q.deadline}</span></div>
+                        <h4 class="font-extrabold text-slate-900 text-lg">${escapeHtml(q.title)}</h4>
+                        <p class="text-sm text-slate-700 font-medium pre-wrap bg-white p-4 rounded-xl border border-slate-200 shadow-inner">${escapeHtml(q.body)}</p>
+                        ${q.fileName ? `<a href="${q.fileData}" download="${q.fileName}" class="text-xs text-teal-700 block font-bold bg-teal-50 px-4 py-2.5 rounded-xl border border-teal-200 inline-flex items-center gap-1.5"><i class="fa-solid fa-download"></i> Download Supervisor File / Attachment: ${escapeHtml(q.fileName)}</a>` : ''}
+
+                        <div class="space-y-3 pt-3 border-t border-slate-200">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">Your Reply / Message to Supervisor (Editable / Deletable)</label>
+                                <textarea id="ans_${q.id}" rows="3" placeholder="Type your reply or answer here..." class="w-full px-4 py-3 bg-white border border-slate-300 rounded-2xl text-sm font-medium text-slate-900">${escapeHtml(hasAnswered ? ans.text : '')}</textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">Attach File (Max 40MB)</label>
+                                <input type="file" id="ansFile_${q.id}" class="w-full text-xs text-slate-500 bg-white border border-slate-300 rounded-2xl file:py-3 file:px-4 file:mr-3 file:bg-slate-100 file:border-0 file:font-bold">
+                                ${hasAnswered && ans.fileName ? `<div class="text-xs text-emerald-700 font-bold mt-1.5 inline-flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Attached File: ${escapeHtml(ans.fileName)} (<a href="${ans.fileData}" download="${ans.fileName}" class="underline text-teal-700">Download</a>)</div>` : ''}
+                            </div>
+                            <div class="flex justify-end space-x-2 pt-1">
+                                ${hasAnswered ? `<button onclick="deleteStudentAnswer('${q.id}')" class="px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-2xl text-xs font-bold transition"><i class="fa-solid fa-trash mr-1"></i> Delete Reply</button>` : ''}
+                                <button onclick="submitAnswer('${q.id}')" class="px-5 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-2xl text-xs font-bold shadow-md flex items-center gap-1.5 transition"><i class="fa-solid fa-paper-plane"></i> ${hasAnswered ? 'Update & Send Reply' : 'Send Reply to Supervisor'}</button>
+                            </div>
+                        </div>
+
+                        ${hasAnswered && ans.supervisorReply ? `<div class="bg-amber-50 border border-amber-300 p-4 rounded-2xl space-y-1"><div class="text-xs font-bold text-amber-800 flex items-center gap-1.5"><i class="fa-solid fa-user-tie"></i> Supervisor Feedback Reply:</div><div class="text-xs text-slate-800 font-medium pre-wrap mt-1">${escapeHtml(ans.supervisorReply)}</div></div>` : ''}
+                    </div>
+                `;
+            });
+        }
+
+        function renderStudentFeatures() {
+            const list = document.getElementById('studentFeaturesList');
+            list.innerHTML = '';
+            if (customFeatures.length === 0) {
+                list.innerHTML = `<div class="p-6 text-center text-slate-500 font-medium">No custom modules published by admin yet.</div>`;
+                return;
+            }
+
+            customFeatures.forEach(f => {
+                list.innerHTML += `
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 space-y-2.5 shadow-sm">
+                        <h4 class="font-extrabold text-slate-900 text-base">${escapeHtml(f.title)}</h4>
+                        <p class="text-sm text-slate-700 font-medium pre-wrap">${escapeHtml(f.desc)}</p>
+                        ${f.fileName ? `<a href="${f.fileData}" download="${f.fileName}" class="text-xs text-teal-700 font-bold block mt-1.5 inline-flex items-center gap-1"><i class="fa-solid fa-download"></i> Download Resource: ${escapeHtml(f.fileName)}</a>` : ''}
+                    </div>
+                `;
+            });
+        }
+
+        async function handleUpdateStudentProfile(e) {
+            e.preventDefault();
+            const newName = document.getElementById('editStudentProfileName').value.trim();
+            const newEmail = document.getElementById('editStudentProfileEmail').value.trim();
+            const newPhone = document.getElementById('editStudentProfilePhone').value.trim();
+            const newGender = document.getElementById('editStudentProfileGender').value;
+            const newDept = document.getElementById('editStudentProfileDept').value.trim();
+            const newPass = document.getElementById('editStudentProfilePass').value.trim();
+
+            const studentObj = students.find(s => s.id.toUpperCase() === currentUser.id.toUpperCase());
+            if (studentObj) {
+                studentObj.name = newName;
+                studentObj.email = newEmail;
+                studentObj.phone = newPhone;
+                studentObj.gender = newGender;
+                studentObj.dept = newDept;
+                studentObj.password = newPass;
+
+                currentUser.name = newName;
+                currentUser.dept = newDept;
+                localStorage.setItem('chuka_user_session', JSON.stringify(currentUser));
+
+                await saveState();
+                alert("Profile, email, and WhatsApp number updated successfully!");
+                renderStudentDashboard();
+            } else {
+                alert("Error: Student profile not found.");
+            }
+        }
+
+        async function submitAnswer(qId) {
+            const text = document.getElementById(`ans_${qId}`).value.trim();
+            const fileInput = document.getElementById(`ansFile_${qId}`);
+            const key = `${currentUser.id}_${qId}`;
+            const existing = studentAnswers[key] || {};
+            let fileName = existing.fileName || null, fileData = existing.fileData || null;
+
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                if (file.size > 40 * 1024 * 1024) { alert("File exceeds 40MB limit."); return; }
+                fileName = file.name;
+                fileData = await readFileAsDataURL(file);
+            }
+
+            if (!text && !fileData) { alert("Please provide reply text or attach a file."); return; }
+
+            studentAnswers[key] = { text, fileName, fileData, time: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), supervisorReply: existing.supervisorReply || null };
+            await saveState();
+            alert("Reply successfully sent / updated in supervisor portal inbox!");
+            renderStudentInbox();
+        }
+
+        async function deleteStudentAnswer(qId) {
+            if (confirm("Are you sure you want to delete your reply?")) {
+                const key = `${currentUser.id}_${qId}`;
+                delete studentAnswers[key];
+                await saveState();
+                alert("Reply deleted successfully.");
+                renderStudentInbox();
+            }
+        }
+
+        async function executeStudentSignIn() {
+            await loadState();
+            const now = new Date();
+            const todayStr = now.toLocaleDateString('en-CA');
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            let record = attendance.find(a => a.studentId === currentUser.id && a.date === todayStr);
+            if (!record) {
+                attendance.push({ studentId: currentUser.id, studentName: currentUser.name, date: todayStr, signInTime: timeStr, signOutTime: null });
+            } else {
+                record.signInTime = timeStr;
+            }
+            await saveState();
+            alert("Sign-In Successful!");
+            updateStudentDashboardUI();
+            renderStudentAttendanceLog();
+        }
+
+        async function executeStudentSignOut() {
+            await loadState();
+            const now = new Date();
+            const todayStr = now.toLocaleDateString('en-CA');
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            let record = attendance.find(a => a.studentId === currentUser.id && a.date === todayStr);
+            if (record) { 
+                record.signOutTime = timeStr; 
+                await saveState(); 
+                alert("Sign-Out Successful!"); 
+                updateStudentDashboardUI(); 
+                renderStudentAttendanceLog(); 
+            } else {
+                alert("Error: No active sign-in record found for today to sign out from.");
+            }
+        }
+
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function exportCSV() {
+            let csv = "Name,REG,Email,WhatsApp,Gender,Date,In,Out\n";
+            attendance.forEach(a => {
+                const s = students.find(st => st.id === a.studentId);
+                csv += `"${a.studentName}","${a.studentId}","${s ? s.email || '' : ''}","${s ? s.phone || '' : ''}","${s ? s.gender : 'N/A'}","${a.date}","${a.signInTime}","${a.signOutTime}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'attendance_contacts.csv'; link.click();
+        }
+
+        function startLiveClock() {
+            setInterval(() => {
+                const now = new Date();
+                const clockStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const shortClockStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                if (document.getElementById('liveClock')) document.getElementById('liveClock').innerText = clockStr;
+                if (document.getElementById('dashLiveClock')) document.getElementById('dashLiveClock').innerText = clockStr;
+                if (document.getElementById('liveDate')) document.getElementById('liveDate').innerText = now.toLocaleDateString();
+                if (document.getElementById('topBarClock')) document.getElementById('topBarClock').innerText = shortClockStr;
+                if (document.getElementById('topBarDate')) document.getElementById('topBarDate').innerText = dateStr;
+            }, 1000);
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function escapeHtml(str) { return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : ''; }
+    </script>
+</body>
+</html>
