@@ -1243,14 +1243,6 @@
             }
         }
 
-                    }
-                }
-                if(document.getElementById('connectionBadge')) {
-                    document.getElementById('connectionBadge').innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1.5 text-amber-400"></i> Offline Mode Active (Saved Locally)`;
-                }
-            }
-        }
-
         async function saveAdminTimeSettings() {
             settings.signInStart = document.getElementById('cfgSignInStart').value || "06:00";
             settings.signInEnd = document.getElementById('cfgSignInEnd').value || "09:00";
